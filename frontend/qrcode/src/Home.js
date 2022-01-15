@@ -24,15 +24,36 @@ const Home = () => {
     const [AlertServerFailExplanation, setAlertServerFailExplanation] = useState(false);
     const [AlertServerFail, setAlertServerFail] = useState(false);
     const [AlertSuccess, setAlertSuccess] = useState(false);
+    const [AlertLoginSuccess, setAlertLoginSuccess] = useState(false);
+    const [AlertLoginFail, setAlertLoginFail] = useState(false);
     const [ExplanationText, setExplanationText] = useState('');
     const [RenderSendButton, setRenderSendButton] = useState(true);
+    const [RenderSignUpButton, setRenderSignUpButton] = useState(true);
     const [showLoginModal, setShowLoginModal] = useState(false);
     const [Username, setUsername] = useState('');
     const [Password, setPassword] = useState('');
-    const handleClose = () => setShowLoginModal(false);
-    const handleShow = () => setShowLoginModal(true);
-
     
+
+
+    const handleShow = () => { 
+    setShowLoginModal(true);
+    setAlertLoginFail(false)
+    setAlertLoginSuccess(false)
+    setRenderSignUpButton(true)
+    setUsername('')
+    setPassword('')
+
+  }
+
+  const handleClose = () => { 
+    setShowLoginModal(false);
+    setAlertLoginFail(false)
+    setAlertLoginSuccess(false)
+    setRenderSignUpButton(true)
+    setUsername('')
+    setPassword('')
+
+  }
 
     const StoerCodeOptions = [
       {name: "Ja", value: "yes"},
@@ -60,7 +81,23 @@ const Home = () => {
 
         });
 
-       
+        const checkLogin = () => {
+        if(Username === 'Monteur' && Password === 'BusamMonteur'){
+        setAlertLoginSuccess(true)
+        setAlertLoginFail(false)
+        setRenderSignUpButton(false)
+        setUsername('')
+        setPassword('')
+
+        } else {
+          setAlertLoginFail(true)
+          setAlertLoginSuccess(false)
+          setRenderSignUpButton(true)
+          setUsername('')
+          setPassword('')
+        }
+
+      }
 
         const sendMail = () => {
           setAlertStoerung(false)
@@ -352,9 +389,24 @@ variant="outline-primary"
 
           <Modal show={showLoginModal} onHide={handleClose}>
         <Modal.Header closeButton>
-          <Modal.Title>Login für Wartungsanlagen-Informationen</Modal.Title>
+          <Modal.Title>Anmeldung für Wartungsanlagen-Informationen</Modal.Title>
         </Modal.Header>
-        <Modal.Body>  <Form>
+        <Modal.Body> 
+        {AlertLoginFail ? (
+  <Alert variant="danger" onClose={() => setAlertLoginFail(false)} dismissible>
+       Der Benutzername oder das Passwort ist falsch!
+        
+      </Alert>
+  ): null }
+
+{AlertLoginSuccess ? (
+  <Alert variant="success" onClose={() => setAlertLoginSuccess(false)} dismissible>
+       Die Anmeldung war erfolgreich. Sie können nun die Wartungsanlagedaten einsehen. 
+        
+      </Alert>
+  ): null }
+          
+           <Form>
   <Form.Group className="mb-3">
     <Form.Label>Benutzername:</Form.Label>
     <Form.Control value={Username} onChange={(e) => setUsername(e.target.value)} type="text" placeholder="Benutzername" />
@@ -378,9 +430,11 @@ variant="outline-primary"
           <Button variant="secondary" onClick={handleClose}>
             Schließen
           </Button>
-          <Button variant="primary" onClick={handleClose}>
+          {RenderSignUpButton ? (
+          <Button variant="primary" onClick={checkLogin}>
             Anmelden
           </Button>
+           ): null }
         </Modal.Footer>
       </Modal>
 
