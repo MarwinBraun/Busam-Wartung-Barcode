@@ -5,7 +5,7 @@ import { useParams } from "react-router-dom"
 import axios from "axios"
 
 
-import  {Button, Container, Col, Row, Image, Form, ButtonGroup, ToggleButton} from 'react-bootstrap'
+import  {Alert, Button, Container, Col, Row, Image, Form, ButtonGroup, ToggleButton} from 'react-bootstrap'
 
 const Home = () => {
   const [TextAnlage, setTextAnlage] = useState('');
@@ -17,7 +17,11 @@ const Home = () => {
     const [checkedUndicht, setCheckedUndicht] = useState(false);
     const [StoerCodeValue, setStoerCodeValue] = useState("");
     const [NotdienstLeistungValue, setNotdienstLeistungValue] = useState("");
-
+    const [AlertStoerung, setAlertStoerung] = useState(false);
+    const [AlertStoerCode, setAlertStoerCode] = useState(false);
+    const [AlertNotdienst, setAlertNotdienst] = useState(false);
+    const [AlertName, setAlertName] = useState(false);
+    
 
     const StoerCodeOptions = [
       {name: "Ja", value: "yes"},
@@ -49,7 +53,24 @@ const Home = () => {
 
 
         const sendMail = () => {
-        
+          setAlertStoerung(false)
+          setAlertStoerCode(false)
+          setAlertNotdienst(false)
+          setAlertName(false)
+
+
+          if(checkedHeizung === false && checkedWarmWasser === false  && checkedUndicht === false ){
+           setAlertStoerung(true)
+
+           } else if(StoerCodeValue === "") {
+            setAlertStoerCode(true)  
+          } else if(NotdienstLeistungValue === "") {
+            setAlertNotdienst(true)  
+          } else if(Name === '' || Telefonnummer === '') {
+            setAlertName(true)  
+          }
+           
+           else { 
           axios.post('http://192.168.50.250:5000/sendMail', {
             AnlagenNummer: TextAnlage,
             Geraet: GeraetText,
@@ -67,7 +88,7 @@ const Home = () => {
           }, (error) => {
             console.log(error);
           });
-         
+        }  
 
       
       }  
@@ -230,8 +251,48 @@ variant="outline-primary"
 
   <br/>
 
+  {AlertStoerung ? (
+  <Alert variant="danger" onClose={() => setAlertStoerung(false)} dismissible>
+        <Alert.Heading>Es wurde keine Auswahl der Störung getroffen</Alert.Heading>
+        <p>
+          Bite kreuzen Sie eine oder mehrere Optionen unter "Welche Störung liegt vor?" an. 
+        </p>
+      </Alert>
+  ): null }
+
+{AlertStoerCode ? (
+  <Alert variant="danger" onClose={() => setAlertStoerCode(false)} dismissible>
+        <Alert.Heading>Es wurde keine Auswahl über den Störcode getroffen</Alert.Heading>
+        <p>
+          Bitte kreuzen Sie eine Option unter "Wird an der Heizungsanlage ein Störcode angezeigt?" an. 
+        </p>
+      </Alert>
+  ): null }
+
+{AlertNotdienst ? (
+  <Alert variant="danger" onClose={() => setAlertNotdienst(false)} dismissible>
+        <Alert.Heading>Es wurde keine Auswahl über die Notdienstleistung getroffen</Alert.Heading>
+        <p>
+          Bitte kreuzen Sie eine Option unter "Soll die Störung als Notdienstleistung übermittelt werden?" an. 
+        </p>
+      </Alert>
+  ): null }
+
+{AlertName ? (
+  <Alert variant="danger" onClose={() => setAlertName(false)} dismissible>
+        <Alert.Heading>Es wurde kein Name oder eine Telefonnummer eingetragen</Alert.Heading>
+        <p>
+          Bitte tragen Sie Ihren Namen und Ihre Telefonnummer ein. 
+        </p>
+      </Alert>
+  ): null }
+
+
   <Button onClick={sendMail} variant="primary">Absenden</Button>
-              
+
+ 
+
+
               </Col>
           </Row>
       </Container>
