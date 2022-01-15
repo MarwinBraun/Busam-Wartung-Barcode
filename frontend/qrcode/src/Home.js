@@ -8,12 +8,22 @@ import  {Button, Container, Col, Row, Image, Form, ButtonGroup, ToggleButton} fr
 const Home = () => {
   const [TextAnlage, setTextAnlage] = useState('');
   const [GeraetText, setGeraetText] = useState('');
+  const [Name, setName] = useState('');
+  const [Telefonnummer, setTelefonnummer] = useState('');
     const [checkedHeizung, setCheckedHeizung] = useState(false);
     const [checkedWarmWasser, setCheckedWarmWasser] = useState(false);
     const [checkedUndicht, setCheckedUndicht] = useState(false);
     const [StoerCodeValue, setStoerCodeValue] = useState("");
+    const [NotdienstLeistungValue, setNotdienstLeistungValue] = useState("");
+
 
     const StoerCodeOptions = [
+      {name: "Ja", value: "yes"},
+      {name: "Nein", value: "no"},   
+
+    ];
+
+    const NotdienstLeistungOptions = [
       {name: "Ja", value: "yes"},
       {name: "Nein", value: "no"},   
 
@@ -58,7 +68,7 @@ const Home = () => {
               <Col xs={12}>
               
               <Form>
-  <Form.Group className="mb-3" controlId="formBasicEmail">
+  <Form.Group className="mb-3">
     <Form.Label>Wartungsanlagen Nummer</Form.Label>
     <Form.Control disabled value={TextAnlage} onChange={(e) => setTextAnlage(e.target.value)} type="text" placeholder="Wartungsanlagen-Nummer" />
    
@@ -67,7 +77,7 @@ const Home = () => {
   </Form>
 
   <Form>
-  <Form.Group className="mb-3" controlId="formBasicEmail">
+  <Form.Group className="mb-3">
     <Form.Label>Geräte Nummer / Bezeichnung</Form.Label>
     <Form.Control disabled value={GeraetText} onChange={(e) => setGeraetText(e.target.value)} type="text" placeholder="Geräte Nummer / Bezeichnung" />
  
@@ -151,6 +161,56 @@ variant="outline-primary"
 
   
 </ButtonGroup>
+
+<br/> <br/>
+
+<h5>Soll die Störung als Notdienstleistung übermittelt werden?</h5>
+
+<ButtonGroup  className="mb-2">
+{NotdienstLeistungOptions.map((option, index) => (
+
+<ToggleButton
+style={{marginLeft: "10px"}}
+key={index}
+id={`optionNotdienst-${index}`}
+type="radio"
+name="radioNotdienst"
+value={option.value}
+checked={NotdienstLeistungValue === option.value}
+onChange={e => setNotdienstLeistungValue(e.currentTarget.value)}
+variant="outline-primary"
+
+
+
+>
+{option.name}
+</ToggleButton>
+
+
+))}
+
+
+
+</ButtonGroup>
+
+<br/> <br/>
+
+
+  <Form.Group className="mb-3">
+    <Form.Label>Ihr Name:</Form.Label>
+    <Form.Control value={Name} onChange={(e) => setName(e.target.value)} type="text" />
+   
+  </Form.Group>
+
+  <Form.Group className="mb-3">
+    <Form.Label>Ihre Telefonnummer:</Form.Label>
+    <Form.Control value={Telefonnummer} onChange={(e) => setTelefonnummer(e.target.value)} type="text" />
+   
+  </Form.Group>
+
+  <br/>
+
+  <Button variant="primary">Absenden</Button>
               
               </Col>
           </Row>
