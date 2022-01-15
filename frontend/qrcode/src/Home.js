@@ -21,6 +21,13 @@ const Home = () => {
     const [AlertStoerCode, setAlertStoerCode] = useState(false);
     const [AlertNotdienst, setAlertNotdienst] = useState(false);
     const [AlertName, setAlertName] = useState(false);
+    const [AlertServerFailExplanation, setAlertServerFailExplanation] = useState(false);
+    const [AlertServerFail, setAlertServerFail] = useState(false);
+    const [AlertSuccess, setAlertSuccess] = useState(false);
+    const [ExplanationText, setExplanationText] = useState('');
+    const [RenderSendButton, setRenderSendButton] = useState(true);
+
+
     
 
     const StoerCodeOptions = [
@@ -57,6 +64,10 @@ const Home = () => {
           setAlertStoerCode(false)
           setAlertNotdienst(false)
           setAlertName(false)
+          setAlertSuccess(false)
+          setAlertServerFail(false)
+          setAlertServerFailExplanation(false)
+          setExplanationText('')
 
 
           if(checkedHeizung === false && checkedWarmWasser === false  && checkedUndicht === false ){
@@ -71,7 +82,8 @@ const Home = () => {
           }
            
            else { 
-          axios.post('http://192.168.50.250:5000/sendMail', {
+        try { 
+          const res = axios.post('http://192.168.50.250:5000/sendMail', {
             AnlagenNummer: TextAnlage,
             Geraet: GeraetText,
             Heizung: checkedHeizung,
@@ -83,13 +95,19 @@ const Home = () => {
             Telefonnummer: Telefonnummer
 
           })
-          .then((response) => {
-            console.log(response);
-          }, (error) => {
-            console.log(error);
-          });
-        }  
 
+          setAlertSuccess(true)
+          setRenderSendButton(false)
+          
+        } catch (err) { 
+          if (err.response.status === 500) {
+            setAlertServerFail(true)
+        }else {
+          setAlertServerFailExplanation(true)
+          setExplanationText(err.response.data.msg)
+        } 
+      }   
+      }  
       
       }  
 
@@ -287,10 +305,38 @@ variant="outline-primary"
       </Alert>
   ): null }
 
+{AlertServerFail ? (
+  <Alert variant="danger" onClose={() => setAlertServerFail(false)} dismissible>
+        <Alert.Heading>Serverfehler</Alert.Heading>
+        <p>
+        {ExplanationText}
+        </p>
+      </Alert>
+  ): null }
 
+{AlertServerFailExplanation ? (
+  <Alert variant="danger" onClose={() => setAlertServerFailExplanation(false)} dismissible>
+        <Alert.Heading>Serverfehler</Alert.Heading>
+        <p>
+          Es liegt ein Problem mit dem Server vor, bitte informieren Sie die Firma Busam telefonisch. 
+        </p>
+      </Alert>
+  ): null }
+
+{AlertSuccess ? (
+  <Alert variant="success" onClose={() => setAlertSuccess(false)} dismissible>
+        <Alert.Heading>Übertragung erfolgreich</Alert.Heading>
+        <p>
+          Vielen Dank für die Erstellung Ihrer Störungsmeldung, wir werden Sie zeitnah kontaktieren.
+        </p>
+      </Alert>
+  ): null }
+
+
+
+{RenderSendButton ? (
   <Button onClick={sendMail} variant="primary">Absenden</Button>
-
- 
+  ): null }
 
 
               </Col>

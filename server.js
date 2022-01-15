@@ -31,12 +31,53 @@ app.post('/sendMail', (req, res) => {
   const Notdienst = req.body.Notdienst
   const Name = req.body.Name
   const Telefonnummer = req.body.Telefonnummer
+  let stringStoerungsarten = ''
+  let improvedStoerCode = ''
+  let improvedNotdienst = ''
+
+  if(Heizung){
+    stringStoerungsarten += 'Keine Heizung, '
+
+    } 
+
+
+  if(WarmWasser){
+    stringStoerungsarten += 'Kein Warmwasser, '
+
+    } 
+
+    if(Undicht){
+      stringStoerungsarten += 'Undichtigkeit an der Heizungsanlage, '
+  
+      } 
+
+      if(StoerCode === 'no'){
+        improvedStoerCode = 'Nein'
+    
+        } 
+
+        if(StoerCode === 'yes'){
+          improvedStoerCode = 'Ja'
+      
+          } 
+
+          if(Notdienst === 'no'){
+            improvedNotdienst = 'Nein'
+        
+            } 
+    
+            if(Notdienst === 'yes'){
+              improvedNotdienst = 'Ja'
+          
+              } 
+    
+
 
   const allInformation = `Betroffene Anlagennummer: ${AnlagenNR}\n
   Betroffenes Gerät: ${Geraet}\n
-  Störungsart: ${Heizung} ${WarmWasser} ${Undicht}\n
-  Störcode: ${StoerCode}\n
-  Notdienst: ${Notdienst}\n
+  Störungsart: ${stringStoerungsarten}\n
+  Störcode: ${improvedStoerCode}\n
+  Notdienst: ${improvedNotdienst}\n
   Kunden-Name: ${Name}\n
   Kunden-Telefonnummer: ${Telefonnummer}\n`
 
@@ -64,12 +105,9 @@ app.post('/sendMail', (req, res) => {
 
 transporter.sendMail(mailOptions, (error, info) => {
   if (error) {
-      return console.log(error);
+      return res.status(400).json({msg: error});
   }
-  console.log('Message sent: %s', info.messageId);   
-  console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
-
-  //res.render('contact', {msg:'Email has been sent'});
+  res.json({msg: 'Success'});
 });
 
 
