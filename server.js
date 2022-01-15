@@ -1,71 +1,82 @@
 const express = require('express');
-const fileUpload = require('express-fileupload');
-var fs = require('fs');
 var cors = require('cors')
 var bodyParser = require('body-parser');
+const exphbs = require('express-handlebars');
+const path = require('path');
+const nodemailer = require('nodemailer');
 
 
 const app = express();
+//app.engine('handlebars', exphbs());
+//app.set('view-engine', 'handlebars');
 app.use(cors());
 
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
 
-app.use('/static', express.static(`${__dirname}/client/public/uploads/`));
 
-app.use(fileUpload());
 
-// Upload Endpoint
-app.post('/upload', (req, res) => {
-  if (req.files === null) {
-    return res.status(400).json({ msg: 'No file uploaded' });
+
+
+
+app.post('/sendMail', (req, res) => {
+
+  const AnlagenNR = req.body.AnlagenNummer
+  const Geraet = req.body.Geraet
+  const Heizung = req.body.Heizung
+  const WarmWasser = req.body.WarmWasser
+  const Undicht = req.body.Undicht
+  const StoerCode = req.body.StoerCode
+  const Notdienst = req.body.Notdienst
+  const Name = req.body.Name
+  const Telefonnummer = req.body.Telefonnummer
+
+  const allInformation = `Betroffene Anlagennummer: ${AnlagenNR}\n
+  Betroffenes Gerät: ${Geraet}\n
+  Störungsart: ${Heizung} ${WarmWasser} ${Undicht}\n
+  Störcode: ${StoerCode}\n
+  Notdienst: ${Notdienst}\n
+  Kunden-Name: ${Name}\n
+  Kunden-Telefonnummer: ${Telefonnummer}\n`
+
+ 
+  let transporter = nodemailer.createTransport({
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false, // true for 465, false for other ports
+    auth: {
+        user: 'stoerung.meldung.busam@gmail.com', // generated ethereal user
+        pass: 'Busam2022!'  // generated ethereal password
+    },
+    tls:{
+      rejectUnauthorized:false
+    }
+  });
+
+  let mailOptions = {
+    from: '"Störungsmeldung Busam" stoerung.meldung.busam@gmail.com', // sender address
+    to: 'mb@itunds.de', // list of receivers
+    subject: 'Neue Störungsmeldung', // Subject line
+    text: allInformation, // plain text body
+    //html: output // html body
+};
+
+transporter.sendMail(mailOptions, (error, info) => {
+  if (error) {
+      return console.log(error);
   }
+  console.log('Message sent: %s', info.messageId);   
+  console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
 
-  const file = req.files.file;
-  const name1 = req.body.name1;
-  const name2 = req.body.name2;
-  const name3 = req.body.name3;
-  const zusammen = name1 + ' ' + name2 + ' ' + name3 + ' ' + file.name + ' ' + `http://192.168.178.63:5000/static/${file.name}` + '\n';
-
-
-fs.appendFile(`${__dirname}/client/public/uploads/mynewfile1.txt`, zusammen, function (err) {
-  if (err) throw err;
-  console.log('Saved!');
-});
-
-if (fs.existsSync(`${__dirname}/client/public/uploads/${file.name}`)) {
-    const d = 'dfsfdsf';
-    let text = d.toString();
-    let together = 'test.jpg';
-  file.mv(`${__dirname}/client/public/uploads/${together}`, err => {
-    if (err) {
-      console.error(err);
-      return res.status(500).send(err);
-    }
-
-    res.json({name1: name1, name2: name2, name3: name3, fileName: file.name, filePath: `http://192.168.178.63:5000/static/${file.name}` });
-  });
-  }else{
-
-  file.mv(`${__dirname}/client/public/uploads/${file.name}`, err => {
-    if (err) {
-      console.error(err);
-      return res.status(500).send(err);
-    }
-
-    res.json({name1: name1, name2: name2, name3: name3, fileName: file.name, filePath: `http://192.168.178.63:5000/static/${file.name}` });
-  });
-}
+  //res.render('contact', {msg:'Email has been sent'});
 });
 
 
-app.post('/testapi', (req, res) => {
-
- const code = req.body.code;
-
-  res.status(200).json({barcode: code, msg: 'FehlerServer'});
 
 });
 
-app.listen(6000, () => console.log('Server Started...'));
+
+
+
+app.listen(5000, () => console.log('Server gestartet...'));

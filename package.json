@@ -19,9 +19,12 @@
     "cors": "^2.8.5",
     "express": "^4.17.2",
     "express-fileupload": "^1.2.1",
+    "express-handlebars": "^6.0.2",
     "fs": "^0.0.1-security",
     "mssql": "^7.3.0",
+    "nodemailer": "^6.7.2",
     "nodemon": "^2.0.15",
+    "path": "^0.12.7",
     "react-bootstrap": "^2.1.1"
   }
 }

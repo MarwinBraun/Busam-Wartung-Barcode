@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react"
 
 import { useParams } from "react-router-dom"
 
+import axios from "axios"
+
 
 import  {Button, Container, Col, Row, Image, Form, ButtonGroup, ToggleButton} from 'react-bootstrap'
 
@@ -43,15 +45,33 @@ const Home = () => {
 
         });
 
-        const print = () => {
         
+
+
+        const sendMail = () => {
+        
+          axios.post('http://192.168.50.250:5000/sendMail', {
+            AnlagenNummer: TextAnlage,
+            Geraet: GeraetText,
+            Heizung: checkedHeizung,
+            WarmWasser: checkedWarmWasser,
+            Undicht: checkedUndicht,
+            StoerCode: StoerCodeValue,
+            Notdienst: NotdienstLeistungValue,
+            Name: Name,
+            Telefonnummer: Telefonnummer
+
+          })
+          .then((response) => {
+            console.log(response);
+          }, (error) => {
+            console.log(error);
+          });
          
 
-            alert(StoerCodeValue 
-            
-              )
-        
-        }  
+      
+      }  
+
 
 
         return (
@@ -59,7 +79,7 @@ const Home = () => {
           <Row>
               <Col xs={4}><Image src={'https://www.busam-online.de/cms/de/media/pagebau/Logo.gif'} fluid/></Col>
               <Col style={{position: "relative"}} xs={8}><Col style={{position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)"}}><h3>Busam Störungsmeldung</h3></Col></Col>
-          <Button onClick={print} />
+         
           </Row>
 <br/>
 
@@ -210,7 +230,7 @@ variant="outline-primary"
 
   <br/>
 
-  <Button variant="primary">Absenden</Button>
+  <Button onClick={sendMail} variant="primary">Absenden</Button>
               
               </Col>
           </Row>
