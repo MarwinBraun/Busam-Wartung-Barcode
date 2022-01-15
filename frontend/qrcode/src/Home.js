@@ -1,5 +1,6 @@
 import React, { useState } from "react"
 
+
 import  {Container, Col, Row, Image, Form, ButtonGroup, ToggleButton} from 'react-bootstrap'
 
 const Home = () => {
@@ -10,7 +11,7 @@ const Home = () => {
       <Container>
           <Row>
               <Col xs={4}><Image src={'https://www.busam-online.de/cms/de/media/pagebau/Logo.gif'} fluid/></Col>
-              <Col className='text-center' xs={8}><h3>Busam Störungsmeldung</h3></Col>
+              <Col style={{position: "relative"}} xs={8}><Col style={{position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)"}}><h3>Busam Störungsmeldung</h3></Col></Col>
           </Row>
 <br/>
 
