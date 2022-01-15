@@ -1,13 +1,36 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
+
+import { useParams } from "react-router-dom"
 
 
 import  {Container, Col, Row, Image, Form, ButtonGroup, ToggleButton} from 'react-bootstrap'
 
 const Home = () => {
+  const [TextAnlage, setTextAnlage] = useState('');
+  const [GeraetText, setGeraetText] = useState('');
     const [checkedHeizung, setCheckedHeizung] = useState(false);
     const [checkedWarmWasser, setCheckedWarmWasser] = useState(false);
-        const [checkedUndicht, setCheckedUndicht] = useState(false);
-    return (
+    const [checkedUndicht, setCheckedUndicht] = useState(false);
+   
+    const params = useParams()
+
+        useEffect(() => {  
+          if(!params.anlagenid || !params.geraetid) { 
+          alert('Keine Anlagen-Nummer oder Gerätebezeichnung vergeben!')
+          window.location.href = "https://busam-online.de"; 
+        }
+
+        params.anlagenid.replace('/', "")
+        params.geraetid.replace(/\\/g, "")
+        params.anlagenid.replace('/', "")
+        params.geraetid.replace(/\\/g, "")
+
+           setTextAnlage(params.anlagenid)
+           setGeraetText(params.geraetid) 
+
+        });
+   
+        return (
       <Container>
           <Row>
               <Col xs={4}><Image src={'https://www.busam-online.de/cms/de/media/pagebau/Logo.gif'} fluid/></Col>
@@ -22,7 +45,7 @@ const Home = () => {
               <Form>
   <Form.Group className="mb-3" controlId="formBasicEmail">
     <Form.Label>Wartungsanlagen Nummer</Form.Label>
-    <Form.Control type="text" placeholder="Wartungsanlagen-Nummer" />
+    <Form.Control value={TextAnlage} onChange={(e) => setTextAnlage(e.target.value)} type="text" placeholder="Wartungsanlagen-Nummer" />
    
   </Form.Group>
 
@@ -31,7 +54,7 @@ const Home = () => {
   <Form>
   <Form.Group className="mb-3" controlId="formBasicEmail">
     <Form.Label>Geräte Nummer / Bezeichnung</Form.Label>
-    <Form.Control type="text" placeholder="Geräte Nummer / Bezeichnung" />
+    <Form.Control value={GeraetText} onChange={(e) => setGeraetText(e.target.value)} type="text" placeholder="Geräte Nummer / Bezeichnung" />
  
   </Form.Group>
 
