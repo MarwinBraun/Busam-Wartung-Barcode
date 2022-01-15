@@ -5,7 +5,7 @@ import { useParams } from "react-router-dom"
 import axios from "axios"
 
 
-import  {Alert, Button, Container, Col, Row, Image, Form, ButtonGroup, ToggleButton} from 'react-bootstrap'
+import  {Modal, Alert, Button, Container, Col, Row, Image, Form, ButtonGroup, ToggleButton} from 'react-bootstrap'
 
 const Home = () => {
   const [TextAnlage, setTextAnlage] = useState('');
@@ -26,7 +26,11 @@ const Home = () => {
     const [AlertSuccess, setAlertSuccess] = useState(false);
     const [ExplanationText, setExplanationText] = useState('');
     const [RenderSendButton, setRenderSendButton] = useState(true);
-
+    const [showLoginModal, setShowLoginModal] = useState(false);
+    const [Username, setUsername] = useState('');
+    const [Password, setPassword] = useState('');
+    const handleClose = () => setShowLoginModal(false);
+    const handleShow = () => setShowLoginModal(true);
 
     
 
@@ -56,8 +60,7 @@ const Home = () => {
 
         });
 
-        
-
+       
 
         const sendMail = () => {
           setAlertStoerung(false)
@@ -117,8 +120,13 @@ const Home = () => {
       <Container>
           <Row>
               <Col xs={4}><Image src={'https://www.busam-online.de/cms/de/media/pagebau/Logo.gif'} fluid/></Col>
-              <Col style={{position: "relative"}} xs={8}><Col style={{position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)"}}><h3>Busam Störungsmeldung</h3></Col></Col>
+              <Col style={{position: "relative"}} xs={8}><Col xs={12} style={{position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", textAlign: "center"}}><h3>Busam Störungsmeldung</h3></Col></Col>
          
+          </Row>
+          <br/>
+
+          <Row>
+            <Col xs={5}><Button onClick={handleShow} variant="info">Informationen anzeigen (nur für Monteure)</Button></Col>
           </Row>
 <br/>
 
@@ -341,7 +349,45 @@ variant="outline-primary"
 
               </Col>
           </Row>
+
+          <Modal show={showLoginModal} onHide={handleClose}>
+        <Modal.Header closeButton>
+          <Modal.Title>Login für Wartungsanlagen-Informationen</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>  <Form>
+  <Form.Group className="mb-3">
+    <Form.Label>Benutzername:</Form.Label>
+    <Form.Control value={Username} onChange={(e) => setUsername(e.target.value)} type="text" placeholder="Benutzername" />
+   
+  </Form.Group>
+
+  </Form>
+  
+  <Form>
+  <Form.Group className="mb-3">
+    <Form.Label>Passwort:</Form.Label>
+    <Form.Control value={Password} onChange={(e) => setPassword(e.target.value)} type="password" placeholder="Passwort" />
+   
+  </Form.Group>
+
+  </Form>
+
+
+  </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleClose}>
+            Schließen
+          </Button>
+          <Button variant="primary" onClick={handleClose}>
+            Anmelden
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+
       </Container>
+
+      
     )
 }
 
