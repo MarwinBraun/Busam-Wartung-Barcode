@@ -24,17 +24,21 @@ const Home = () => {
     const [AlertServerFailExplanation, setAlertServerFailExplanation] = useState(false);
     const [AlertDeviceFailExplanation, setAlertDeviceFailExplanation] = useState(false);
     const [AlertMessDataFailExplanation, setAlertMessDataFailExplanation] = useState(false);
+    const [AlertHistoryFailExplanation, setAlertHistoryFailExplanation] = useState(false);
     const [AlertServerFail, setAlertServerFail] = useState(false);
     const [AlertGetDevices, setAlertGetDevices] = useState(false);
     const [AlertGetMessData, setAlertGetMessData] = useState(false);
+    const [AlertGetHistoryData, setAlertGetHistoryData] = useState(false);
     const [AlertSuccess, setAlertSuccess] = useState(false);
     const [AlertLoginSuccess, setAlertLoginSuccess] = useState(false);
     const [AlertLoginFail, setAlertLoginFail] = useState(false);
     const [AlertNoDeviceAvailable, setAlertNoDeviceAvailable] = useState(false);
     const [AlertNoMessdatenAvailable, setAlertNoMessdatenAvailable] = useState(false);
+    const [AlertNoHistoryAvailable, setAlertNoHistoryAvailable] = useState(false);
     const [ExplanationText, setExplanationText] = useState('');
     const [DeviceExplanationText, setDeviceExplanationText] = useState('');
     const [MessDataExplanationText, setMessDataExplanationText] = useState('');
+    const [HistoryExplanationText, setHistoryExplanationText] = useState('');
     const [RenderSendButton, setRenderSendButton] = useState(true);
     const [RenderSignUpButton, setRenderSignUpButton] = useState(true);
     const [showLoginModal, setShowLoginModal] = useState(false);
@@ -42,8 +46,10 @@ const Home = () => {
     const [Password, setPassword] = useState('');
     const [DataComingBack, setDataComingBack] = useState({});
     const [MessDataComingBack, setMessDataComingBack] = useState({});
+    const [HistoryDataComingBack, setHistoryDataComingBack] = useState({});
     const [showGeraeteTable, setshowGeraeteTable] = useState(false);
     const [showMessDataTable, setshowMessDataTable] = useState(false);
+    const [showHistoryDataTable, setshowHistoryDataTable] = useState(false);
 
 
 
@@ -65,6 +71,13 @@ const Home = () => {
     setAlertMessDataFailExplanation(false)
     setMessDataExplanationText('')
     setAlertGetMessData(false)
+
+
+    setshowHistoryDataTable(false)
+    setAlertNoHistoryAvailable(false)
+    setAlertHistoryFailExplanation(false)
+    setHistoryExplanationText('')
+    setAlertGetHistoryData(false)
 
   }
 
@@ -145,7 +158,7 @@ const anfrage = await axios.get('http://192.168.50.250:5000/getDeviceData', {
      'Infotext': deviceSplit[11],
    
    });
-      console.log(myarr);
+     //console.log(myarr);
       
      }
      setDataComingBack(myarr);
@@ -228,6 +241,84 @@ const anfrage = await axios.get('http://192.168.50.250:5000/getDeviceData', {
       } 
        
 
+
+
+      try {
+        const anfrage = await axios.get('http://192.168.50.250:5000/getHistory', {
+            params: {
+              AnlagenNummer: TextAnlage 
+            }
+          }) 
+        
+            var myarr = new Array();
+            const back = anfrage.data;
+        
+            if(back.msg.length){
+             setAlertNoHistoryAvailable(false)
+             for(var i = 0; i < back.msg.length; i++) {
+              let id = back.msg[i].id;
+               let AuftragsNr = back.msg[i].AuftragsNr;
+               let Betreff = back.msg[i].Betreff;
+               let TerminDatum = '';
+               let Monteur = '';
+               let TerminText = '';
+               if(back.msg[i].TerminDatum !== null) {
+                 let split = back.msg[i].TerminDatum.split('-');
+                 let Day = split[2].split('T');
+                 TerminDatum = Day[0] + '.' + split[1] + '.' + split[0];
+              }else {
+                 TerminDatum = '';
+              }
+
+              if(back.msg[i].Monteur !== null) {
+                Monteur = back.msg[i].Monteur
+             }else {
+              Monteur = '';
+             }
+
+
+             if(back.msg[i].TerminText !== 'NULL') {
+              TerminText = back.msg[i].TerminText
+           }else {
+            TerminText = '';
+           }
+
+           let Planstunden = back.msg[i].PlanStunden;
+             //console.log(back);
+           
+             myarr.push({'id': id, 
+             'AuftragsNr': AuftragsNr,
+             'Betreff': Betreff,
+             'TerminDatum': TerminDatum,
+             'Monteur': Monteur,
+             'TerminText': TerminText,
+             'Planstunden': Planstunden
+             
+           
+           });
+             // console.log(myarr);
+              
+             }
+             setHistoryDataComingBack(myarr);
+             setshowHistoryDataTable(true);
+            } else {
+              setAlertNoHistoryAvailable(true)
+            } 
+          
+          } catch (err) { 
+              if (err.response.status === 500) {
+                setAlertGetHistoryData(true)
+            }else {
+              setAlertHistoryFailExplanation(true)
+              setHistoryExplanationText(err.response.data.msg)
+            } 
+          } 
+           
+    
+    
+    
+    
+      
 
 
 
@@ -576,9 +667,38 @@ variant="outline-primary"
   </div>
     ): null }
 
+{AlertNoHistoryAvailable ? (
+  <Alert variant="info">
+       Keine Historie vorhanden.
+        
+      </Alert>
+  ): null }
+
+{AlertHistoryFailExplanation ? (
+  <Alert variant="danger">
+        
+     
+        {HistoryExplanationText}
+        
+      </Alert>
+  ): null }
+
+{AlertGetHistoryData ? (
+  <Alert variant="danger">
+        
+        
+          Die Wartungshistorie konnte nicht abgerufen werden. 
+     
+      </Alert>
+  ): null }
+
+
+
+
+
 {AlertNoDeviceAvailable ? (
   <Alert variant="info">
-       Keine Gerätedaten vorhanden
+       Keine Gerätedaten vorhanden.
         
       </Alert>
   ): null }
@@ -605,7 +725,7 @@ variant="outline-primary"
 
 {AlertNoMessdatenAvailable ? (
   <Alert variant="info">
-       Keine Messdaten vorhanden
+       Keine Messdaten vorhanden.
         
       </Alert>
   ): null }
@@ -627,6 +747,59 @@ variant="outline-primary"
      
       </Alert>
   ): null }
+
+
+
+
+{showHistoryDataTable ? 
+   (
+     <div>
+      <h5>Die letzten 5 Einträge der Wartungshistorie</h5>
+     
+   
+  <Table bordered hover responsive>
+   <thead>
+     <tr>
+       <th>Wartungsauftragnummer</th>
+       <th>Betreff</th>
+       <th>Datum</th>
+       <th>Monteur</th>
+       <th>Termin-Text</th>
+       <th>Planstunden</th>
+     </tr>
+   </thead>
+   <tbody>
+    
+  
+   {HistoryDataComingBack.map(device => (
+     
+    //let newArray = device.Geraetedaten;
+    //let  DevicesImproved = newArray.split(';')
+ 
+
+   <tr key={device.id}>
+     <td>{device.AuftragsNr}</td>
+     <td>{device.Betreff}</td>
+     <td>{device.TerminDatum}</td>
+     <td>{device.Monteur}</td>
+     <td>{device.TerminText}</td>
+     <td>{device.Planstunden}</td>
+   
+  
+ </tr>
+
+   )) }
+    
+
+
+   </tbody>
+  </Table>
+  </div>
+    ) :
+   null 
+   
+   }
+ 
 
 
 

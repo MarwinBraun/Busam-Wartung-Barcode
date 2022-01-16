@@ -257,6 +257,80 @@ app.get('/getMessData', (req, res) => {
 
 
 
+app.get('/getHistory', (req, res) => {
+ 
+ 
+
+  const AN_Nummer = req.query.AnlagenNummer;
+    
+
+
+  sql.connect(config, function (err) {
+        
+    if (err) console.log(err);
+
+    // create Request object
+    var request = new sql.Request();
+       //localhost:3000/AL170217/b
+    // query to the database and get the records
+    request
+    .input('nummer', sql.VarChar, AN_Nummer)
+    .query(`select TOP (5) AuftragsNr, Betreff, TerminDatum, Monteur, TerminText, PlanStunden from WartAuftraege where AnlagenNr = @nummer order by AnlageDatum desc`, function (err, recordset) {
+        
+        if (err) {
+        return res.status(400).json({msg: err});
+        //console.log(err)
+        //console.log(recordset);
+      }
+
+        var myarr = new Array();
+    
+       for (var i = 0; i < recordset.recordset.length; ++i) {
+           var AuftragsNr = recordset.recordset[i].AuftragsNr;
+           var Betreff = recordset.recordset[i].Betreff;
+           var TerminDatum = recordset.recordset[i].TerminDatum;
+           var Monteur = recordset.recordset[i].Monteur;
+           var TerminText = recordset.recordset[i].TerminText;
+           var PlanStunden = recordset.recordset[i].PlanStunden;
+           myarr.push({'id': i, 
+           'AuftragsNr': AuftragsNr,
+           'Betreff': Betreff,
+           'TerminDatum': TerminDatum,
+           'Monteur': Monteur,
+           'TerminText': TerminText,
+           'PlanStunden': PlanStunden});
+         }  
+
+        //console.log(myarr);
+        
+       // console.log(recordset);
+       //return res.json(recordset.recordsets[0]);
+       return res.json({msg: myarr});
+        
+
+      
+
+      
+
+
+        
+    });
+});
+
+
+
+
+  
+
+
+
+
+
+});
+
+
+
+
 
 
 app.listen(5000, () => console.log('Server gestartet...'));
