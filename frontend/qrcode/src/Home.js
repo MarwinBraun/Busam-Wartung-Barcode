@@ -5,7 +5,7 @@ import { useParams } from "react-router-dom"
 import axios from "axios"
 
 
-import  {Modal, Alert, Button, Container, Col, Row, Image, Form, ButtonGroup, ToggleButton} from 'react-bootstrap'
+import  {Table, Modal, Alert, Button, Container, Col, Row, Image, Form, ButtonGroup, ToggleButton} from 'react-bootstrap'
 
 const Home = () => {
   const [TextAnlage, setTextAnlage] = useState('');
@@ -26,13 +26,16 @@ const Home = () => {
     const [AlertSuccess, setAlertSuccess] = useState(false);
     const [AlertLoginSuccess, setAlertLoginSuccess] = useState(false);
     const [AlertLoginFail, setAlertLoginFail] = useState(false);
+    const [AlertNoDeviceAvailable, setAlertNoDeviceAvailable] = useState(false);
     const [ExplanationText, setExplanationText] = useState('');
     const [RenderSendButton, setRenderSendButton] = useState(true);
     const [RenderSignUpButton, setRenderSignUpButton] = useState(true);
     const [showLoginModal, setShowLoginModal] = useState(false);
     const [Username, setUsername] = useState('');
     const [Password, setPassword] = useState('');
-    
+    const [DataComingBack, setDataComingBack] = useState({});
+    const [showGeraeteTable, setshowGeraeteTable] = useState(false);
+  
 
 
     const handleShow = () => { 
@@ -42,6 +45,8 @@ const Home = () => {
     setRenderSignUpButton(true)
     setUsername('')
     setPassword('')
+    setshowGeraeteTable(false)
+    setAlertNoDeviceAvailable(false)
 
   }
 
@@ -52,6 +57,8 @@ const Home = () => {
     setRenderSignUpButton(true)
     setUsername('')
     setPassword('')
+    setshowGeraeteTable(false)
+    console.log(DataComingBack);
 
   }
 
@@ -81,13 +88,133 @@ const Home = () => {
 
         });
 
-        const checkLogin = () => {
-        if(Username === 'Monteur' && Password === 'BusamMonteur'){
+        const checkLogin = async () => {
+        if(Username === '1' && Password === '1'){
         setAlertLoginSuccess(true)
         setAlertLoginFail(false)
         setRenderSignUpButton(false)
         setUsername('')
         setPassword('')
+
+const anfrage = await axios.get('http://192.168.50.250:5000/getDeviceData', {
+    params: {
+      AnlagenNummer: TextAnlage 
+    }
+  }).then(function (response) {
+
+    var myarr = new Array();
+    const back = response.data;
+
+    if(back.msg.length){
+     setAlertNoDeviceAvailable(false)
+     for(var i = 0; i < back.msg.length; i++) {
+      let id = back.msg[i].id;
+       let device = back.msg[i].Geraetedaten;
+       let deviceSplit = device.split(';')
+     //console.log(back);
+   
+     myarr.push({'id': id, 
+     'Bauteil': deviceSplit[0],
+     'Hersteller': deviceSplit[1],
+     'Seriennummer': deviceSplit[2],
+     'Baujahr': deviceSplit[3],
+     'Typ': deviceSplit[4],
+     'KältemittelTyp': deviceSplit[5],
+     'KältemittelMenge': deviceSplit[6],
+     'Inbetriebnahme': deviceSplit[7],
+     'Standort': deviceSplit[8],
+     'Besonderheit': deviceSplit[10],
+     'Infotext': deviceSplit[11],
+   
+   });
+      console.log(myarr);
+      
+     }
+     setDataComingBack(myarr);
+     setshowGeraeteTable(true);
+    } else {
+      setAlertNoDeviceAvailable(true)
+    }
+    //setTimeout(function(){
+      //console.log(DataComingBack);
+    //}, 2000)
+    //console.log(back);
+  })
+
+  
+
+ 
+  //const zwischen = new Array();
+  
+  // for (var i = 0; i < back.length; i++ ) {
+   //await setDataComingBack(back[i])
+   //zwischen.push(back[i]);
+   //console.log(back);
+  //}
+
+  //console.log(zwischen);
+   
+  //await setDataComingBack(back);
+  //setshowGeraeteTable(true);
+  //console.log(DataComingBack);
+  //setshowGeraeteTable(true);
+
+  //back.map(device => {
+    //let ger = {
+     //Geraetedaten : device.Geraetedaten
+    //}
+    //setDataComingBack([...DataComingBack, ger])
+    //})
+
+  //console.log(DataComingBack);
+  //console.log(TextAnlage);
+
+  //.then(function (response) {
+    //alert(response.data);
+    //const back = await response.json();
+    //setAlleGeraete(back);
+    //setshowGeraeteTable(true)
+    //alert(JSON.stringify(AlleGeraete))
+    //console.log(AlleGeraete);
+  //}) 
+
+        /*
+        const res = axios.get('http://192.168.50.250:5000/getDeviceData', {
+          params: { AnlagenNummer: TextAnlage  }
+            
+
+          })
+          */
+
+      // setAlleGeraete(res.data);
+      // alert(JSON.stringify(res.recordset.recordset));
+     
+         // setAlleGeraete(answer.data);
+          //console.log(1);
+
+         
+
+        /*
+
+        try { 
+          const res = axios.get('http://192.168.50.250:5000/getDeviceData', {
+          params: { AnlagenNummer: TextAnlage  }
+            
+
+          })
+
+       setAlleGeraete(res.data);
+       setshowGeraeteTable(true)
+          
+        } catch (err) { 
+          if (err.response.status === 500) {
+            setAlertServerFail(true)
+        }else {
+          setAlertServerFailExplanation(true)
+          setExplanationText(err.response.data.msg)
+        } 
+
+      } */
 
         } else {
           setAlertLoginFail(true)
@@ -405,7 +532,8 @@ variant="outline-primary"
         
       </Alert>
   ): null }
-          
+           {RenderSignUpButton ? (
+             <div>
            <Form>
   <Form.Group className="mb-3">
     <Form.Label>Benutzername:</Form.Label>
@@ -423,6 +551,70 @@ variant="outline-primary"
   </Form.Group>
 
   </Form>
+
+  </div>
+    ): null }
+
+{AlertNoDeviceAvailable ? (
+  <Alert variant="info">
+       Keine Gerätedaten vorhanden
+        
+      </Alert>
+  ): null }
+
+{showGeraeteTable ? 
+   (
+  <Table bordered hover responsive>
+   <thead>
+     <tr>
+       <th>Bauteil</th>
+       <th>Hersteller</th>
+       <th>Seriennummer</th>
+       <th>Baujahr</th>
+       <th>Typ</th>
+       <th>Kältemittel-Typ</th>
+       <th>Kältemittel-Menge</th>
+       <th>Inbetriebnahme</th>
+       <th>Standort</th>
+       <th>Besonderheit</th>
+       <th>InfoText</th>
+     </tr>
+   </thead>
+   <tbody>
+    
+  
+   {DataComingBack.map(device => (
+     
+    //let newArray = device.Geraetedaten;
+    //let  DevicesImproved = newArray.split(';')
+ 
+
+   <tr key={device.id}>
+     <td>{device.Bauteil}</td>
+     <td>{device.Hersteller}</td>
+     <td>{device.Seriennummer}</td>
+     <td>{device.Baujahr}</td>
+     <td>{device.Typ}</td>
+     <td>{device.KältemittelTyp}</td>
+     <td>{device.KältemittelMenge}</td>
+     <td>{device.Inbetriebnahme}</td>
+     <td>{device.Standort}</td>
+     <td>{device.Besonderheit}</td>
+     <td>{device.Infotext}</td>
+  
+ </tr>
+
+   )) }
+    
+
+
+   </tbody>
+  </Table>
+    ) :
+   null 
+   
+   }
+ 
 
 
   </Modal.Body>

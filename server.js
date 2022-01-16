@@ -1,4 +1,5 @@
 const express = require('express');
+var sql = require("mssql");
 var cors = require('cors')
 var bodyParser = require('body-parser');
 const exphbs = require('express-handlebars');
@@ -109,6 +110,75 @@ transporter.sendMail(mailOptions, (error, info) => {
   }
   res.json({msg: 'Success'});
 });
+
+
+
+});
+
+  // config for your database
+  const config = {
+    user: 'sa',
+    password: 'kwpsarix',
+    server: 'srv-sql', 
+    database: 'BNWINS',
+    options: {
+      instanceName: 'KWP',
+      trustServerCertificate: true
+  }
+
+
+
+};
+
+app.get('/getDeviceData', (req, res) => {
+ 
+ 
+
+  const AN_Nummer = req.query.AnlagenNummer;
+    
+
+
+  sql.connect(config, function (err) {
+        
+    if (err) console.log(err);
+
+    // create Request object
+    var request = new sql.Request();
+       //localhost:3000/AL170217/b
+    // query to the database and get the records
+    request
+    .input('nummer', sql.VarChar, AN_Nummer)
+    .query(`select * from WartGeraete where AnlagenNr = @nummer`, function (err, recordset) {
+        
+        if (err) console.log(err)
+        //console.log(recordset);
+
+        var myarr = new Array();
+    
+       for (var i = 0; i < recordset.recordset.length; ++i) {
+           var Geraetedaten = recordset.recordset[i].Geraetedaten;
+           myarr.push({'id': i, 'Geraetedaten': Geraetedaten});
+         }  
+
+        //console.log(myarr);
+        
+       // console.log(recordset);
+       //return res.json(recordset.recordsets[0]);
+       return res.json({msg: myarr});
+        
+
+      
+
+      
+
+
+        
+    });
+});
+
+  
+
+
 
 
 
