@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useRef } from "react"
 
 import { useParams } from "react-router-dom"
 
@@ -51,7 +51,7 @@ const Home = () => {
     const [showMessDataTable, setshowMessDataTable] = useState(false);
     const [showHistoryDataTable, setshowHistoryDataTable] = useState(false);
 
-
+    const inputRef = useRef(null);
 
     const handleShow = () => { 
     setShowLoginModal(true);
@@ -78,6 +78,8 @@ const Home = () => {
     setAlertHistoryFailExplanation(false)
     setHistoryExplanationText('')
     setAlertGetHistoryData(false)
+    
+    //inputRef.current.focus();
 
   }
 
@@ -626,7 +628,7 @@ variant="outline-primary"
               </Col>
           </Row>
 
-          <Modal show={showLoginModal} onHide={handleClose}>
+          <Modal onShow={() => {inputRef.current.focus()}} show={showLoginModal} onHide={handleClose}>
         <Modal.Header closeButton>
           <Modal.Title>Anmeldung für Wartungsanlagen-Informationen</Modal.Title>
         </Modal.Header>
@@ -649,7 +651,7 @@ variant="outline-primary"
            <Form>
   <Form.Group className="mb-3">
     <Form.Label>Benutzername:</Form.Label>
-    <Form.Control value={Username} onChange={(e) => setUsername(e.target.value)} type="text" placeholder="Benutzername" />
+    <Form.Control ref={inputRef} value={Username} onChange={(e) => setUsername(e.target.value)} type="text" placeholder="Benutzername" />
    
   </Form.Group>
 
