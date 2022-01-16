@@ -22,20 +22,29 @@ const Home = () => {
     const [AlertNotdienst, setAlertNotdienst] = useState(false);
     const [AlertName, setAlertName] = useState(false);
     const [AlertServerFailExplanation, setAlertServerFailExplanation] = useState(false);
+    const [AlertDeviceFailExplanation, setAlertDeviceFailExplanation] = useState(false);
+    const [AlertMessDataFailExplanation, setAlertMessDataFailExplanation] = useState(false);
     const [AlertServerFail, setAlertServerFail] = useState(false);
+    const [AlertGetDevices, setAlertGetDevices] = useState(false);
+    const [AlertGetMessData, setAlertGetMessData] = useState(false);
     const [AlertSuccess, setAlertSuccess] = useState(false);
     const [AlertLoginSuccess, setAlertLoginSuccess] = useState(false);
     const [AlertLoginFail, setAlertLoginFail] = useState(false);
     const [AlertNoDeviceAvailable, setAlertNoDeviceAvailable] = useState(false);
+    const [AlertNoMessdatenAvailable, setAlertNoMessdatenAvailable] = useState(false);
     const [ExplanationText, setExplanationText] = useState('');
+    const [DeviceExplanationText, setDeviceExplanationText] = useState('');
+    const [MessDataExplanationText, setMessDataExplanationText] = useState('');
     const [RenderSendButton, setRenderSendButton] = useState(true);
     const [RenderSignUpButton, setRenderSignUpButton] = useState(true);
     const [showLoginModal, setShowLoginModal] = useState(false);
     const [Username, setUsername] = useState('');
     const [Password, setPassword] = useState('');
     const [DataComingBack, setDataComingBack] = useState({});
+    const [MessDataComingBack, setMessDataComingBack] = useState({});
     const [showGeraeteTable, setshowGeraeteTable] = useState(false);
-  
+    const [showMessDataTable, setshowMessDataTable] = useState(false);
+
 
 
     const handleShow = () => { 
@@ -47,6 +56,15 @@ const Home = () => {
     setPassword('')
     setshowGeraeteTable(false)
     setAlertNoDeviceAvailable(false)
+    setAlertDeviceFailExplanation(false)
+    setDeviceExplanationText('')
+    setAlertGetDevices(false)
+
+    setshowMessDataTable(false)
+    setAlertNoMessdatenAvailable(false)
+    setAlertMessDataFailExplanation(false)
+    setMessDataExplanationText('')
+    setAlertGetMessData(false)
 
   }
 
@@ -58,7 +76,7 @@ const Home = () => {
     setUsername('')
     setPassword('')
     setshowGeraeteTable(false)
-    console.log(DataComingBack);
+    //console.log(DataComingBack);
 
   }
 
@@ -95,15 +113,15 @@ const Home = () => {
         setRenderSignUpButton(false)
         setUsername('')
         setPassword('')
-
+try {
 const anfrage = await axios.get('http://192.168.50.250:5000/getDeviceData', {
     params: {
       AnlagenNummer: TextAnlage 
     }
-  }).then(function (response) {
+  }) 
 
     var myarr = new Array();
-    const back = response.data;
+    const back = anfrage.data;
 
     if(back.msg.length){
      setAlertNoDeviceAvailable(false)
@@ -134,87 +152,90 @@ const anfrage = await axios.get('http://192.168.50.250:5000/getDeviceData', {
      setshowGeraeteTable(true);
     } else {
       setAlertNoDeviceAvailable(true)
-    }
-    //setTimeout(function(){
-      //console.log(DataComingBack);
-    //}, 2000)
-    //console.log(back);
-  })
+    } 
+  
+  } catch (err) { 
+      if (err.response.status === 500) {
+        setAlertGetDevices(true)
+    }else {
+      setAlertDeviceFailExplanation(true)
+      setDeviceExplanationText(err.response.data.msg)
+    } 
+  } 
+   
+
+
+  try {
+    const anfrage = await axios.get('http://192.168.50.250:5000/getMessData', {
+        params: {
+          AnlagenNummer: TextAnlage 
+        }
+      }) 
+    
+        var myarr = new Array();
+        const back = anfrage.data;
+    
+        if(back.msg.length){
+         setAlertNoMessdatenAvailable(false)
+         for(var i = 0; i < back.msg.length; i++) {
+          let id = back.msg[i].id;
+           let device = back.msg[i].Messdaten;
+           let deviceSplit = device.split(';')
+         //console.log(back);
+       
+         myarr.push({'id': id, 
+         'Messdatum': deviceSplit[0],
+         'Gasanschlußdruck': deviceSplit[1],
+         'Kaminzug': deviceSplit[2],
+         'KesseltempMin': deviceSplit[3],
+         'GasfliesdruckMin': deviceSplit[4],
+         'AbgastemperaturMin': deviceSplit[5],
+         'WirkungsgradMin': deviceSplit[6],
+         'CO2Min': deviceSplit[7],
+         'COPPMMin': deviceSplit[8],
+         'O2Min': deviceSplit[9],
+         'KesseltempMax': deviceSplit[10],
+         'GasfliesdruckMax': deviceSplit[11],
+         'AbgastemperaturMax': deviceSplit[12],
+         'WirkungsgradMax': deviceSplit[13],
+         'CO2Max': deviceSplit[14],
+         'COPPMMax': deviceSplit[15],
+         'O2Max': deviceSplit[16],
+         'WasserqualiDH': deviceSplit[17],
+         'WasserqualiLeitwert': deviceSplit[18],
+         'WasserqualiPH': deviceSplit[19],
+         'Anlagedruck': deviceSplit[20],
+         'Vordruck': deviceSplit[21],
+         'NachfuellMenge': deviceSplit[22],
+       
+       });
+         // console.log(myarr);
+          
+         }
+         setMessDataComingBack(myarr);
+         setshowMessDataTable(true);
+        } else {
+          setAlertNoMessdatenAvailable(true)
+        } 
+      
+      } catch (err) { 
+          if (err.response.status === 500) {
+            setAlertGetMessData(true)
+        }else {
+          setAlertMessDataFailExplanation(true)
+          setMessDataExplanationText(err.response.data.msg)
+        } 
+      } 
+       
+
+
+
+
+  
 
   
 
  
-  //const zwischen = new Array();
-  
-  // for (var i = 0; i < back.length; i++ ) {
-   //await setDataComingBack(back[i])
-   //zwischen.push(back[i]);
-   //console.log(back);
-  //}
-
-  //console.log(zwischen);
-   
-  //await setDataComingBack(back);
-  //setshowGeraeteTable(true);
-  //console.log(DataComingBack);
-  //setshowGeraeteTable(true);
-
-  //back.map(device => {
-    //let ger = {
-     //Geraetedaten : device.Geraetedaten
-    //}
-    //setDataComingBack([...DataComingBack, ger])
-    //})
-
-  //console.log(DataComingBack);
-  //console.log(TextAnlage);
-
-  //.then(function (response) {
-    //alert(response.data);
-    //const back = await response.json();
-    //setAlleGeraete(back);
-    //setshowGeraeteTable(true)
-    //alert(JSON.stringify(AlleGeraete))
-    //console.log(AlleGeraete);
-  //}) 
-
-        /*
-        const res = axios.get('http://192.168.50.250:5000/getDeviceData', {
-          params: { AnlagenNummer: TextAnlage  }
-            
-
-          })
-          */
-
-      // setAlleGeraete(res.data);
-      // alert(JSON.stringify(res.recordset.recordset));
-     
-         // setAlleGeraete(answer.data);
-          //console.log(1);
-
-         
-
-        /*
-
-        try { 
-          const res = axios.get('http://192.168.50.250:5000/getDeviceData', {
-          params: { AnlagenNummer: TextAnlage  }
-            
-
-          })
-
-       setAlleGeraete(res.data);
-       setshowGeraeteTable(true)
-          
-        } catch (err) { 
-          if (err.response.status === 500) {
-            setAlertServerFail(true)
-        }else {
-          setAlertServerFailExplanation(true)
-          setExplanationText(err.response.data.msg)
-        } 
-
-      } */
 
         } else {
           setAlertLoginFail(true)
@@ -562,8 +583,63 @@ variant="outline-primary"
       </Alert>
   ): null }
 
+{AlertDeviceFailExplanation ? (
+  <Alert variant="danger">
+        
+     
+        {DeviceExplanationText}
+        
+      </Alert>
+  ): null }
+
+{AlertGetDevices ? (
+  <Alert variant="danger">
+        
+        
+          Die Gerätedaten konnten nicht abgerufen werden. 
+     
+      </Alert>
+  ): null }
+
+
+
+{AlertNoMessdatenAvailable ? (
+  <Alert variant="info">
+       Keine Messdaten vorhanden
+        
+      </Alert>
+  ): null }
+
+{AlertMessDataFailExplanation ? (
+  <Alert variant="danger">
+        
+     
+        {MessDataExplanationText}
+        
+      </Alert>
+  ): null }
+
+{AlertGetMessData ? (
+  <Alert variant="danger">
+        
+        
+          Die Messdaten konnten nicht abgerufen werden. 
+     
+      </Alert>
+  ): null }
+
+
+
+
+
+  
+
 {showGeraeteTable ? 
    (
+     <div>
+      <h5>Gerätedaten</h5>
+     
+   
   <Table bordered hover responsive>
    <thead>
      <tr>
@@ -610,11 +686,97 @@ variant="outline-primary"
 
    </tbody>
   </Table>
+  </div>
     ) :
    null 
    
    }
  
+
+ {showMessDataTable ? 
+   (
+     <div>
+      <h5>Messdaten</h5>
+     
+   
+  <Table bordered hover responsive>
+   <thead>
+     <tr>
+       <th>Messdatum</th>
+       <th>Gasanschlußdruck / mbar</th>
+       <th>Kaminzug / mbar</th>
+       <th>Kesseltemp. min / C</th>
+       <th>Gasfliesdruck min / bar</th>
+       <th>Abgastemperatur min / C</th>
+       <th>Wirkungsgrad min / %</th>
+       <th>CO2 min / %</th>
+       <th>CO-ppm min</th>
+       <th>O2 min / %</th>
+       <th>Kesseltemp max / C</th>
+       <th>Gasfliesdruck max / mbar</th>
+       <th>Abgastemp. max / C</th>
+       <th>Wirkungsgrad max. / %</th>
+       <th>CO2 max / %</th>
+       <th>CO-ppm max</th>
+       <th>O2 Max / %</th>
+       <th>Wasserqualität dh</th>
+       <th>Wasserqualität Leitwert yS</th>
+       <th>Wasserqualität ph-Wert</th>
+       <th>Anlagedruck / bar</th>
+       <th>Vordruck MAG / bar</th>
+       <th>Nachfüllmenge / Liter</th>
+     </tr>
+   </thead>
+   <tbody>
+    
+  
+   {MessDataComingBack.map(device => (
+     
+    //let newArray = device.Geraetedaten;
+    //let  DevicesImproved = newArray.split(';')
+ 
+
+   <tr key={device.id}>
+     <td>{device.Messdatum}</td>
+     <td>{device.Gasanschlußdruck}</td>
+     <td>{device.Kaminzug}</td>
+     <td>{device.KesseltempMin}</td>
+     <td>{device.GasfliesdruckMin}</td>
+     <td>{device.AbgastemperaturMin}</td>
+     <td>{device.WirkungsgradMin}</td>
+     <td>{device.CO2Min}</td>
+     <td>{device.COPPMMin}</td>
+     <td>{device.O2Min}</td>
+     <td>{device.KesseltempMax}</td>
+     <td>{device.GasfliesdruckMax}</td>
+     <td>{device.AbgastemperaturMax}</td>
+     <td>{device.WirkungsgradMax}</td>
+     <td>{device.CO2Max}</td>
+     <td>{device.COPPMMax}</td>
+     <td>{device.O2Max}</td>
+     <td>{device.WasserqualiDH}</td>
+     <td>{device.WasserqualiLeitwert}</td>
+     <td>{device.WasserqualiPH}</td>
+     <td>{device.Anlagedruck}</td>
+     <td>{device.Vordruck}</td>
+     <td>{device.NachfuellMenge}</td>
+  
+ </tr>
+
+   )) }
+    
+
+
+   </tbody>
+  </Table>
+  </div>
+    ) :
+   null 
+   
+   }
+ 
+
+
 
 
   </Modal.Body>

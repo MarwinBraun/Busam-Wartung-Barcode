@@ -150,8 +150,11 @@ app.get('/getDeviceData', (req, res) => {
     .input('nummer', sql.VarChar, AN_Nummer)
     .query(`select * from WartGeraete where AnlagenNr = @nummer`, function (err, recordset) {
         
-        if (err) console.log(err)
+        if (err) {
+        return res.status(400).json({msg: err});
+        //console.log(err)
         //console.log(recordset);
+      }
 
         var myarr = new Array();
     
@@ -176,6 +179,9 @@ app.get('/getDeviceData', (req, res) => {
     });
 });
 
+
+
+
   
 
 
@@ -183,6 +189,72 @@ app.get('/getDeviceData', (req, res) => {
 
 
 });
+
+
+
+app.get('/getMessData', (req, res) => {
+ 
+ 
+
+  const AN_Nummer = req.query.AnlagenNummer;
+    
+
+
+  sql.connect(config, function (err) {
+        
+    if (err) console.log(err);
+
+    // create Request object
+    var request = new sql.Request();
+       //localhost:3000/AL170217/b
+    // query to the database and get the records
+    request
+    .input('nummer', sql.VarChar, AN_Nummer)
+    .query(`select * from WartMessdaten where AnlagenNr = @nummer`, function (err, recordset) {
+        
+        if (err) {
+        return res.status(400).json({msg: err});
+        //console.log(err)
+        //console.log(recordset);
+      }
+
+        var myarr = new Array();
+    
+       for (var i = 0; i < recordset.recordset.length; ++i) {
+           var Messdaten = recordset.recordset[i].Messdaten;
+           myarr.push({'id': i, 'Messdaten': Messdaten});
+         }  
+
+        //console.log(myarr);
+        
+       // console.log(recordset);
+       //return res.json(recordset.recordsets[0]);
+       return res.json({msg: myarr});
+        
+
+      
+
+      
+
+
+        
+    });
+});
+
+
+
+
+  
+
+
+
+
+
+});
+
+
+
+
 
 
 
