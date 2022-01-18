@@ -9,7 +9,7 @@ import Home from './Home'
 
 function App() {
   return (
-    <Router>
+    <Router >
    <Routes>
 
    <Route path='/' element={<Home />} />

@@ -50,8 +50,17 @@ const Home = () => {
     const [showGeraeteTable, setshowGeraeteTable] = useState(false);
     const [showMessDataTable, setshowMessDataTable] = useState(false);
     const [showHistoryDataTable, setshowHistoryDataTable] = useState(false);
-
+    const [file, setFile] = useState('');
+    const [StoerText, setStoerText] = useState('');
+    const [AlertExtendedStoerung, setAlertExtendedStoerung] = useState(false);
+    const [filename, setFilename] = useState('Bild schießen oder auswählen');
     const inputRef = useRef(null);
+
+    const onChange = e => {
+      setFile(e.target.files[0]);
+      setFilename(e.target.files[0].name);
+    };
+  
 
     const handleShow = () => { 
     setShowLoginModal(true);
@@ -348,6 +357,7 @@ const anfrage = await axios.get('http://192.168.50.250:5000/getDeviceData', {
           setAlertSuccess(false)
           setAlertServerFail(false)
           setAlertServerFailExplanation(false)
+          setAlertExtendedStoerung(false)
           setExplanationText('')
 
 
@@ -356,7 +366,12 @@ const anfrage = await axios.get('http://192.168.50.250:5000/getDeviceData', {
 
            } else if(StoerCodeValue === "") {
             setAlertStoerCode(true)  
-          } else if(NotdienstLeistungValue === "") {
+          } 
+          
+          else if(StoerCodeValue === 'yes' && file === "" && StoerText === "" ) {
+            setAlertExtendedStoerung(true)  
+          } 
+          else if(NotdienstLeistungValue === "") {
             setAlertNotdienst(true)  
           } else if(Name === '' || Telefonnummer === '') {
             setAlertName(true)  
@@ -390,7 +405,11 @@ const anfrage = await axios.get('http://192.168.50.250:5000/getDeviceData', {
       }   
       }  
       
-      }  
+      } 
+      
+      
+          
+      
 
 
 
@@ -504,10 +523,41 @@ variant="outline-primary"
   ))}
 
 
-  
-</ButtonGroup>
+ 
+</ButtonGroup> <br/> <br/>
+{StoerCodeValue === 'yes' ? (
 
-<br/> <br/>
+  <div>
+
+  <Form>
+  <Form.Group className="mb-3">
+    <Form.Label>Bitte den Störungscode beschreiben oder ein Bild des Fehlers hochladen</Form.Label>
+    <Form.Control as="textarea" rows={3}  value={StoerText} onChange={(e) => setStoerText(e.target.value)} type="text" placeholder="Beschreiben Sie die angezeigte Störungsmeldung..." />
+ 
+  </Form.Group>
+
+  </Form>
+
+  <br/>
+
+  <Form>
+  <Form.Group as={Row}>
+  <input
+            type='file'
+            className='custom-file-input'
+            id='customFile'
+            onChange={onChange}
+          />
+      </Form.Group>
+      </Form>
+      </div>
+
+) : null} 
+
+
+
+
+<br/> 
 
 <h5>Soll die Störung als Notdienstleistung übermittelt werden?</h5>
 
@@ -569,6 +619,15 @@ variant="outline-primary"
         <Alert.Heading>Es wurde keine Auswahl über den Störcode getroffen</Alert.Heading>
         <p>
           Bitte kreuzen Sie eine Option unter "Wird an der Heizungsanlage ein Störcode angezeigt?" an. 
+        </p>
+      </Alert>
+  ): null }
+
+{AlertExtendedStoerung ? (
+  <Alert variant="danger" onClose={() => setAlertExtendedStoerung(false)} dismissible>
+        <Alert.Heading>Es wurde keine Beschreibung oder kein Bild über den Störcode hochgeladen.</Alert.Heading>
+        <p>
+         Bitte beschreiben Sie den Störungscode oder stellen uns ein Bild von der angezeigten Meldung zur Verfügung.
         </p>
       </Alert>
   ): null }
