@@ -379,7 +379,25 @@ const anfrage = await axios.get('http://192.168.50.250:5000/getDeviceData', {
            
            else { 
         try { 
-          const res = axios.post('http://192.168.50.250:5000/sendMail', {
+          const formData = new FormData();
+          formData.append('file', file);
+          formData.append('AnlagenNummer', TextAnlage);
+          formData.append('Geraet', GeraetText);
+          formData.append('Heizung', checkedHeizung);
+          formData.append('WarmWasser', checkedWarmWasser);
+          formData.append('Undicht', checkedUndicht);
+          formData.append('StoerCode', StoerCodeValue);
+          formData.append('StoerText', StoerText);
+          formData.append('Notdienst', NotdienstLeistungValue);
+          formData.append('Name', Name);
+          formData.append('Telefonnummer', Telefonnummer);
+          const res = axios.post('http://192.168.50.250:5000/sendMail', formData, {
+            
+            headers: {
+              'Content-Type': 'multipart/form-data'
+            },
+
+          /*
             AnlagenNummer: TextAnlage,
             Geraet: GeraetText,
             Heizung: checkedHeizung,
@@ -389,6 +407,8 @@ const anfrage = await axios.get('http://192.168.50.250:5000/getDeviceData', {
             Notdienst: NotdienstLeistungValue,
             Name: Name,
             Telefonnummer: Telefonnummer
+
+            */
 
           })
 

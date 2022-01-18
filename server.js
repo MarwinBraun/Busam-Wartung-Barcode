@@ -5,12 +5,16 @@ var bodyParser = require('body-parser');
 const exphbs = require('express-handlebars');
 const path = require('path');
 const nodemailer = require('nodemailer');
+const fileUpload = require('express-fileupload');
 
 
 const app = express();
+app.use(fileUpload());
 //app.engine('handlebars', exphbs());
 //app.set('view-engine', 'handlebars');
 app.use(cors());
+
+app.use('/static', express.static(`${__dirname}/uploads/`));
 
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
@@ -23,18 +27,25 @@ app.use(bodyParser.json());
 
 app.post('/sendMail', (req, res) => {
 
+  var mailOptions = {};
+
+  if (req.files === null) {
+
+
   const AnlagenNR = req.body.AnlagenNummer
   const Geraet = req.body.Geraet
   const Heizung = req.body.Heizung
   const WarmWasser = req.body.WarmWasser
   const Undicht = req.body.Undicht
   const StoerCode = req.body.StoerCode
+  const StoerText = req.body.StoerText
   const Notdienst = req.body.Notdienst
   const Name = req.body.Name
   const Telefonnummer = req.body.Telefonnummer
   let stringStoerungsarten = ''
   let improvedStoerCode = ''
   let improvedNotdienst = ''
+  let improvedStoerText = ''
 
   if(Heizung){
     stringStoerungsarten += 'Keine Heizung, '
@@ -71,6 +82,16 @@ app.post('/sendMail', (req, res) => {
               improvedNotdienst = 'Ja'
           
               } 
+
+              if(StoerText === ''){
+                improvedStoerText = 'Es wurde keine Beschreibung des Störcodes angegeben.'
+            
+                } 
+
+                if(StoerText !== ''){
+                  improvedStoerText = StoerText
+              
+                  } 
     
 
 
@@ -78,9 +99,125 @@ app.post('/sendMail', (req, res) => {
   Betroffenes Gerät: ${Geraet}\n
   Störungsart: ${stringStoerungsarten}\n
   Störcode: ${improvedStoerCode}\n
+  Beschreibung des Störungscode: ${improvedStoerText}\n
   Notdienst: ${improvedNotdienst}\n
   Kunden-Name: ${Name}\n
   Kunden-Telefonnummer: ${Telefonnummer}\n`
+
+
+  mailOptions = {
+    from: '"Störungsmeldung Busam" stoerung.meldung.busam@gmail.com', // sender address
+    to: 'mb@itunds.de', // list of receivers
+    subject: 'Neue Störungsmeldung', // Subject line
+    text: allInformation, // plain text body
+    //html: output // html body
+};
+
+    //return res.status(400).json({ msg: 'Das Bild konnte nicht hochgeladen werden.' });
+  } else{
+
+  const file = req.files.file;
+  const AnlagenNR = req.body.AnlagenNummer
+  const Geraet = req.body.Geraet
+  const Heizung = req.body.Heizung
+  const WarmWasser = req.body.WarmWasser
+  const Undicht = req.body.Undicht
+  const StoerCode = req.body.StoerCode
+  const StoerText = req.body.StoerText
+  const Notdienst = req.body.Notdienst
+  const Name = req.body.Name
+  const Telefonnummer = req.body.Telefonnummer
+  let stringStoerungsarten = ''
+  let improvedStoerCode = ''
+  let improvedNotdienst = ''
+  let improvedStoerText = ''
+
+  if(Heizung){
+    stringStoerungsarten += 'Keine Heizung, '
+
+    } 
+
+
+  if(WarmWasser){
+    stringStoerungsarten += 'Kein Warmwasser, '
+
+    } 
+
+    if(Undicht){
+      stringStoerungsarten += 'Undichtigkeit an der Heizungsanlage, '
+  
+      } 
+
+      if(StoerCode === 'no'){
+        improvedStoerCode = 'Nein'
+    
+        } 
+
+        if(StoerCode === 'yes'){
+          improvedStoerCode = 'Ja'
+      
+          } 
+
+          if(Notdienst === 'no'){
+            improvedNotdienst = 'Nein'
+        
+            } 
+    
+            if(Notdienst === 'yes'){
+              improvedNotdienst = 'Ja'
+          
+              } 
+
+              if(StoerText === ''){
+                improvedStoerText = 'Es wurde keine Beschreibung des Störcodes angegeben.'
+            
+                } 
+
+                if(StoerText !== ''){
+                  improvedStoerText = StoerText
+              
+                  } 
+
+
+                  file.mv(`${__dirname}/uploads/${file.name}`, err => {
+                    if (err) {
+                      console.error(err);
+                      return res.status(500).send(err);
+                    }
+                
+                    //res.json({ fileName: file.name, filePath: `/uploads/${file.name}` });
+                  });
+    
+
+
+  const allInformation = `Betroffene Anlagennummer: ${AnlagenNR}\n
+  Betroffenes Gerät: ${Geraet}\n
+  Störungsart: ${stringStoerungsarten}\n
+  Störcode: ${improvedStoerCode}\n
+  Beschreibung des Störungscode: ${improvedStoerText}\n
+  Es liegt ein Bild der Störungsmeldung im Anhang dieser E-Mail vor. Bitte prüfen Sie dieses Bild.\n
+  Notdienst: ${improvedNotdienst}\n
+  Kunden-Name: ${Name}\n
+  Kunden-Telefonnummer: ${Telefonnummer}\n`
+
+
+  mailOptions = {
+    from: '"Störungsmeldung Busam" stoerung.meldung.busam@gmail.com', // sender address
+    to: 'mb@itunds.de', // list of receivers
+    subject: 'Neue Störungsmeldung', // Subject line
+    text: allInformation, // plain text body
+    //html: output // html body
+    attachments: [{
+      filename: file.name,
+      path: `${__dirname}/uploads/${file.name}`
+  }]
+};
+
+ 
+
+} 
+
+ 
 
  
   let transporter = nodemailer.createTransport({
@@ -96,13 +233,7 @@ app.post('/sendMail', (req, res) => {
     }
   });
 
-  let mailOptions = {
-    from: '"Störungsmeldung Busam" stoerung.meldung.busam@gmail.com', // sender address
-    to: 'mb@itunds.de', // list of receivers
-    subject: 'Neue Störungsmeldung', // Subject line
-    text: allInformation, // plain text body
-    //html: output // html body
-};
+  
 
 transporter.sendMail(mailOptions, (error, info) => {
   if (error) {
