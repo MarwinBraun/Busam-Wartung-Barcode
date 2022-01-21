@@ -5,7 +5,7 @@ import { useParams } from "react-router-dom"
 import axios from "axios"
 
 
-import  {Table, Modal, Alert, Button, Container, Col, Row, Image, Form, ButtonGroup, ToggleButton} from 'react-bootstrap'
+import  {Spinner, Table, Modal, Alert, Button, Container, Col, Row, Image, Form, ButtonGroup, ToggleButton} from 'react-bootstrap'
 
 const Home = () => {
   const [TextAnlage, setTextAnlage] = useState('');
@@ -57,6 +57,7 @@ const Home = () => {
     const [StoerText, setStoerText] = useState('');
     const [AlertExtendedStoerung, setAlertExtendedStoerung] = useState(false);
     const [filename, setFilename] = useState('Bild schießen oder auswählen');
+    const [Loading, setLoading] = useState(false);
     const inputRef = useRef(null);
 
     const onChange = e => {
@@ -103,6 +104,7 @@ const Home = () => {
     setUsername('')
     setPassword('')
     setshowGeraeteTable(false)
+    setLoading(false)
     //console.log(DataComingBack);
 
   }
@@ -135,6 +137,7 @@ const Home = () => {
 
         const checkLogin = async () => {
         if(Username === '1' && Password === '1'){
+        setLoading(true)
         setAlertLoginSuccess(true)
         setAlertLoginFail(false)
         setRenderSignUpButton(false)
@@ -318,6 +321,8 @@ const anfrage = await axios.get('http://stoerung.busam-online.de:5000/getDeviceD
             } else {
               setAlertNoHistoryAvailable(true)
             } 
+
+            setLoading(false)
           
           } catch (err) { 
               if (err.response.status === 500) {
@@ -417,6 +422,7 @@ const anfrage = await axios.get('http://stoerung.busam-online.de:5000/getDeviceD
 
           setAlertSuccess(true)
           setRenderSendButton(false)
+          setLoading(false)
           
         } catch (err) { 
           if (err.response.status === 500) {
@@ -756,6 +762,7 @@ variant="outline-primary"
           <Modal.Title>Anmeldung für Wartungsanlagen-Informationen</Modal.Title>
         </Modal.Header>
         <Modal.Body> 
+
         {AlertLoginFail ? (
   <Alert variant="danger" onClose={() => setAlertLoginFail(false)} dismissible>
        Der Benutzername oder das Passwort ist falsch!
@@ -924,8 +931,16 @@ variant="outline-primary"
    null 
    
    }
- 
+ {Loading ? (
 
+
+ <Row className="justify-content-md-center">
+        <Spinner animation="border" role="status">
+  <span className="visually-hidden">Loading...</span>
+</Spinner>
+</Row>
+
+ ) : null} 
 
 
 
