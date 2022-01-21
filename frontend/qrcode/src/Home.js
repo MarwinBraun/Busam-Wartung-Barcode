@@ -13,8 +13,11 @@ const Home = () => {
   const [Name, setName] = useState('');
   const [Telefonnummer, setTelefonnummer] = useState('');
     const [checkedHeizung, setCheckedHeizung] = useState(false);
+    const [checkedHeizungValue, setcheckedHeizungValue] = useState('no');
     const [checkedWarmWasser, setCheckedWarmWasser] = useState(false);
+    const [checkedWarmWasserValue, setcheckedWarmWasserValue] = useState('no');
     const [checkedUndicht, setCheckedUndicht] = useState(false);
+    const [checkedUndichtValue, setcheckedUndichtValue] = useState('no');
     const [StoerCodeValue, setStoerCodeValue] = useState("");
     const [NotdienstLeistungValue, setNotdienstLeistungValue] = useState("");
     const [AlertStoerung, setAlertStoerung] = useState(false);
@@ -138,7 +141,7 @@ const Home = () => {
         setUsername('')
         setPassword('')
 try {
-const anfrage = await axios.get('http://192.168.50.250:5000/getDeviceData', {
+const anfrage = await axios.get('http://stoerung.busam-online.de:5000/getDeviceData', {
     params: {
       AnlagenNummer: TextAnlage 
     }
@@ -190,7 +193,7 @@ const anfrage = await axios.get('http://192.168.50.250:5000/getDeviceData', {
 
 
   try {
-    const anfrage = await axios.get('http://192.168.50.250:5000/getMessData', {
+    const anfrage = await axios.get('http://stoerung.busam-online.de:5000/getMessData', {
         params: {
           AnlagenNummer: TextAnlage 
         }
@@ -255,7 +258,7 @@ const anfrage = await axios.get('http://192.168.50.250:5000/getDeviceData', {
 
 
       try {
-        const anfrage = await axios.get('http://192.168.50.250:5000/getHistory', {
+        const anfrage = await axios.get('http://stoerung.busam-online.de:5000/getHistory', {
             params: {
               AnlagenNummer: TextAnlage 
             }
@@ -383,15 +386,15 @@ const anfrage = await axios.get('http://192.168.50.250:5000/getDeviceData', {
           formData.append('file', file);
           formData.append('AnlagenNummer', TextAnlage);
           formData.append('Geraet', GeraetText);
-          formData.append('Heizung', checkedHeizung);
-          formData.append('WarmWasser', checkedWarmWasser);
-          formData.append('Undicht', checkedUndicht);
+          formData.append('Heizung', checkedHeizungValue);
+          formData.append('WarmWasser', checkedWarmWasserValue);
+          formData.append('Undicht', checkedUndichtValue);
           formData.append('StoerCode', StoerCodeValue);
           formData.append('StoerText', StoerText);
           formData.append('Notdienst', NotdienstLeistungValue);
           formData.append('Name', Name);
           formData.append('Telefonnummer', Telefonnummer);
-          const res = axios.post('http://192.168.50.250:5000/sendMail', formData, {
+          const res = axios.post('http://stoerung.busam-online.de:5000/sendMail', formData, {
             
             headers: {
               'Content-Type': 'multipart/form-data'
@@ -429,7 +432,48 @@ const anfrage = await axios.get('http://192.168.50.250:5000/getDeviceData', {
       
       
           
-      
+      function HeizungCheck (e) {
+
+        setCheckedHeizung(e.currentTarget.checked)
+        //alert(checkedHeizung)
+        if (checkedHeizung){
+            setcheckedHeizungValue('no')
+        } else{
+          setcheckedHeizungValue('yes')
+        } 
+
+      } 
+
+      function UndichtCheck (e) {
+
+        setCheckedUndicht(e.currentTarget.checked)
+       // alert(checkedUndicht)
+
+        if (checkedUndicht){
+            setcheckedUndichtValue('no')
+        } else{
+          setcheckedUndichtValue('yes')
+        } 
+
+      } 
+
+       
+
+      function WarmWasserCheck (e) {
+
+        setCheckedWarmWasser(e.currentTarget.checked)
+        //alert(checkedWarmWasser)
+
+        if (checkedWarmWasser){
+            setcheckedWarmWasserValue('no')
+        } else{
+          setcheckedWarmWasserValue('yes')
+        } 
+        
+
+      } 
+
+
 
 
 
@@ -479,7 +523,7 @@ const anfrage = await axios.get('http://192.168.50.250:5000/getDeviceData', {
     variant="outline-primary"
     checked={checkedHeizung}
     value="1"
-    onChange={(e) => setCheckedHeizung(e.currentTarget.checked)}
+    onChange={(e) => HeizungCheck(e)}
   >
     Keine Heizung
   </ToggleButton>
@@ -492,7 +536,7 @@ const anfrage = await axios.get('http://192.168.50.250:5000/getDeviceData', {
   variant="outline-primary"
   checked={checkedWarmWasser}
   value="2"
-  onChange={(e) => setCheckedWarmWasser(e.currentTarget.checked)}
+  onChange={(e) => WarmWasserCheck(e)}
 >
   Kein Warmwasser
 </ToggleButton>
@@ -505,7 +549,7 @@ const anfrage = await axios.get('http://192.168.50.250:5000/getDeviceData', {
   variant="outline-primary"
   checked={checkedUndicht}
   value="3"
-  onChange={(e) => setCheckedUndicht(e.currentTarget.checked)}
+  onChange={(e) => UndichtCheck(e)}
 >
   Undichtigkeit an der Heizungsanlage
 </ToggleButton>
