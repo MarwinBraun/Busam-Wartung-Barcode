@@ -124,7 +124,7 @@ app.post('/sendMail', (req, res) => {
 
   mailOptions = {
     from: '"Störungsmeldung Busam" stoerung.meldung.busam@gmail.com', // sender address
-    to: 'mb@itunds.de', // list of receivers
+    to: 'stoerung@busam-online.de', // list of receivers
     subject: 'Neue Störungsmeldung', // Subject line
     text: allInformation, // plain text body
     //html: output // html body
@@ -220,7 +220,7 @@ app.post('/sendMail', (req, res) => {
 
   mailOptions = {
     from: '"Störungsmeldung Busam" stoerung.meldung.busam@gmail.com', // sender address
-    to: 'mb@itunds.de', // list of receivers
+    to: 'stoerung@busam-online.de', // list of receivers
     subject: 'Neue Störungsmeldung', // Subject line
     text: allInformation, // plain text body
     //html: output // html body
