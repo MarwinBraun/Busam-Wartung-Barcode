@@ -6,6 +6,23 @@ const exphbs = require('express-handlebars');
 const path = require('path');
 const nodemailer = require('nodemailer');
 const fileUpload = require('express-fileupload');
+require('dotenv').config();
+
+const SMTP_HOST = process.env.SMTP_HOST;
+const SMTP_PORT = process.env.SMTP_PORT;
+const SMTP_USERNAME = process.env.SMTP_USERNAME;
+const SMTP_PASSWORD = process.env.SMTP_PASSWORD;
+const SQL_USER = process.env.SQL_USER;
+const SQL_PASSWORD = process.env.SQL_PASSWORD;
+const SQL_SERVER = process.env.SQL_SERVER;
+const SQL_DATABASE = process.env.SQL_DATABASE;
+const SQL_INSTANCE = process.env.SQL_INSTANCE;
+
+
+
+
+
+
 
 
 const app = express();
@@ -47,18 +64,18 @@ app.post('/sendMail', (req, res) => {
   let improvedNotdienst = ''
   let improvedStoerText = ''
 
-  if(Heizung){
+  if(Heizung === 'yes'){
     stringStoerungsarten += 'Keine Heizung, '
 
     } 
 
 
-  if(WarmWasser){
+  if(WarmWasser === 'yes'){
     stringStoerungsarten += 'Kein Warmwasser, '
 
     } 
 
-    if(Undicht){
+    if(Undicht === 'yes'){
       stringStoerungsarten += 'Undichtigkeit an der Heizungsanlage, '
   
       } 
@@ -132,18 +149,18 @@ app.post('/sendMail', (req, res) => {
   let improvedNotdienst = ''
   let improvedStoerText = ''
 
-  if(Heizung){
+  if(Heizung === 'yes'){
     stringStoerungsarten += 'Keine Heizung, '
 
     } 
 
 
-  if(WarmWasser){
+  if(WarmWasser === 'yes'){
     stringStoerungsarten += 'Kein Warmwasser, '
 
     } 
 
-    if(Undicht){
+    if(Undicht === 'yes'){
       stringStoerungsarten += 'Undichtigkeit an der Heizungsanlage, '
   
       } 
@@ -221,12 +238,12 @@ app.post('/sendMail', (req, res) => {
 
  
   let transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 587,
+    host: SMTP_HOST,
+    port: SMTP_PORT,
     secure: false, // true for 465, false for other ports
     auth: {
-        user: 'stoerung.meldung.busam@gmail.com', // generated ethereal user
-        pass: 'Busam2022!'  // generated ethereal password
+        user: SMTP_USERNAME, // generated ethereal user
+        pass: SMTP_PASSWORD  // generated ethereal password
     },
     tls:{
       rejectUnauthorized:false
@@ -248,12 +265,12 @@ transporter.sendMail(mailOptions, (error, info) => {
 
   // config for your database
   const config = {
-    user: 'sa',
-    password: 'kwpsarix',
-    server: 'srv-sql', 
-    database: 'BNWINS',
+    user: SQL_USER,
+    password: SQL_PASSWORD,
+    server: SQL_SERVER, 
+    database: SQL_DATABASE,
     options: {
-      instanceName: 'KWP',
+      instanceName: SQL_INSTANCE,
       trustServerCertificate: true
   }
 
