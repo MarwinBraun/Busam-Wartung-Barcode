@@ -5,7 +5,7 @@ const { exec } = require("child_process");
 const directory = `${__dirname}/uploads/`;
 
 
-setInterval(deleteTrash, 43200000);
+setInterval(deleteTrash, 7200000);
 
 function deleteTrash() {
 

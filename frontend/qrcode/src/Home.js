@@ -394,6 +394,7 @@ const anfrage = await axios.get('http://stoerung.busam-online.de:5000/getDeviceD
          else if(file !== "") {
             let fileValidation = filename.split('.'); 
             if(fileValidation[1] === 'png' || fileValidation[1] === 'jpg' || fileValidation[1] === 'jpeg'){
+              setRenderSendButton(false)
               setLoadingSend(true);
                    
             
@@ -442,15 +443,16 @@ const anfrage = await axios.get('http://stoerung.busam-online.de:5000/getDeviceD
               setAlertSuccess(true)
               setRenderSendButton(false)
 
-              }
+             }
               
-              if(res.data.msg === 'Das Bild ist zu groß, es darf nicht größer als 2,5 MB sein!'){
-                setLoadingSend(false)
-                //alert(res.data);
+              if(res.data.msg === 'Das Bild konnte nicht hochgeladen werden, da es die Grenze von 30 MB überschreitet, bitte wählen Sie ein kleineres Bild aus.'){
+              setLoadingSend(false)
+          
                 setExplanationText(res.data.msg)
                 setAlertServerFail(true)
+                setRenderSendButton(true)
              
-              } 
+             } 
 
           
               
@@ -475,6 +477,7 @@ const anfrage = await axios.get('http://stoerung.busam-online.de:5000/getDeviceD
            
        else if(file === "")  { 
         setLoadingSend(true)
+        setRenderSendButton(false)
         try { 
           const formData = new FormData();
           formData.append('file', file);
@@ -518,11 +521,11 @@ const anfrage = await axios.get('http://stoerung.busam-online.de:5000/getDeviceD
 
             } 
 
-            if(res.data.msg === 'Das Bild ist zu groß, es darf nicht größer als 2,5 MB sein!'){
+            if(res.data.msg === 'Das Bild konnte nicht hochgeladen werden, da es die Grenze von 30 MB überschreitet, bitte wählen Sie ein kleineres Bild aus.'){
               setLoadingSend(false)
-              //alert(res.data);
               setExplanationText(res.data.msg)
               setAlertServerFail(true)
+              setRenderSendButton(false)
            
             } 
 
@@ -859,9 +862,16 @@ variant="outline-primary"
 
 
 <Row className="justify-content-md-center">
-       <Spinner animation="border" role="status">
- <span className="visually-hidden">Loading...</span>
-</Spinner>
+<Button variant="primary" disabled>
+    <Spinner
+      as="span"
+      animation="border"
+      size="sm"
+      role="status"
+      aria-hidden="true"
+    />
+    Bitte haben Sie einen Moment Geduld und schließen die Seite nicht, Sie erhalten eine Rückmeldung, sobald Ihre Störungsmeldung an uns erfolgreich übersandt wurde...
+  </Button>
 </Row>
 
 ) : null} 
