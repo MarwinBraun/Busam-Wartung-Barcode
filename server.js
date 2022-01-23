@@ -128,7 +128,35 @@ app.post('/sendMail', (req, res) => {
     subject: 'Neue Störungsmeldung', // Subject line
     text: allInformation, // plain text body
     //html: output // html body
+
+    
+
+
 };
+
+
+ 
+let transporter = nodemailer.createTransport({
+  host: SMTP_HOST,
+  port: SMTP_PORT,
+  secure: false, // true for 465, false for other ports
+  auth: {
+      user: SMTP_USERNAME, // generated ethereal user
+      pass: SMTP_PASSWORD  // generated ethereal password
+  },
+  tls:{
+    rejectUnauthorized:false
+  }
+});
+
+
+
+transporter.sendMail(mailOptions, (error, info) => {
+if (error) {
+    return res.status(400).json({msg: error});
+}
+res.json({msg: 'Success'});
+});
 
     //return res.status(400).json({ msg: 'Das Bild konnte nicht hochgeladen werden.' });
   } else{
@@ -149,6 +177,12 @@ app.post('/sendMail', (req, res) => {
   let improvedNotdienst = ''
   let improvedStoerText = ''
 
+  
+ 
+  if(file.size > 30000000){
+  //console.log(file.size)
+  return res.json({msg: 'Das Bild ist zu groß, es darf nicht größer als 2,5 MB sein!'});
+} else {
   if(Heizung === 'yes'){
     stringStoerungsarten += 'Keine Heizung, '
 
@@ -230,34 +264,39 @@ app.post('/sendMail', (req, res) => {
   }]
 };
 
+
+ 
+let transporter = nodemailer.createTransport({
+  host: SMTP_HOST,
+  port: SMTP_PORT,
+  secure: false, // true for 465, false for other ports
+  auth: {
+      user: SMTP_USERNAME, // generated ethereal user
+      pass: SMTP_PASSWORD  // generated ethereal password
+  },
+  tls:{
+    rejectUnauthorized:false
+  }
+});
+
+
+
+transporter.sendMail(mailOptions, (error, info) => {
+if (error) {
+    return res.status(400).json({msg: error});
+}
+res.json({msg: 'Success'});
+});
+
  
 
 } 
 
- 
+} 
+
 
  
-  let transporter = nodemailer.createTransport({
-    host: SMTP_HOST,
-    port: SMTP_PORT,
-    secure: false, // true for 465, false for other ports
-    auth: {
-        user: SMTP_USERNAME, // generated ethereal user
-        pass: SMTP_PASSWORD  // generated ethereal password
-    },
-    tls:{
-      rejectUnauthorized:false
-    }
-  });
 
-  
-
-transporter.sendMail(mailOptions, (error, info) => {
-  if (error) {
-      return res.status(400).json({msg: error});
-  }
-  res.json({msg: 'Success'});
-});
 
 
 
