@@ -110,16 +110,91 @@ app.post('/sendMail', (req, res) => {
               
                   } 
     
-
+ let ohneComma = stringStoerungsarten.slice(0, -1);
 
   const allInformation = `Betroffene Anlagennummer: ${AnlagenNR}\n
   Betroffenes Gerät: ${Geraet}\n
-  Störungsart: ${stringStoerungsarten}\n
+  Störungsart: ${ohneComma}\n
   Störcode: ${improvedStoerCode}\n
   Beschreibung des Störungscode: ${improvedStoerText}\n
   Notdienst: ${improvedNotdienst}\n
   Kunden-Name: ${Name}\n
   Kunden-Telefonnummer: ${Telefonnummer}\n`
+
+  var output = `
+  <!doctype html>
+<html lang="de">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+
+    
+  </head>
+  <body>
+
+  <div class="row">
+  <div class="col-12 text-center"><img src="https://www.busam-online.de/cms/de/media/pagebau/Logo.gif" class="rounded" alt="..."></div>
+   <br/><br/>
+   <h3 class="text-center"><u>Neue Störungsmeldung erfasst von ${Name}</u></h3>
+  </div> <br/>
+
+<div class="row">
+  <div class="col-12">
+  <h5>Betroffene Anlagennummer: <span class="fw-bold">${AnlagenNR}</span></h5>
+  </div>
+</div>
+
+  <div class="row">
+    <div class="col-12">
+    <h5>Betroffenes Gerät: <span class="fw-bold">${Geraet}</span></h5>
+    </div>
+  </div>
+
+  <div class="row">
+  <div class="col-12">
+  <h5>Störungsart: <span class="fw-bold">${ohneComma}</span></h5>
+  </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+    <h5>Beschreibung des Störungscode: <span class="fw-bold">${improvedStoerText}</span></h5>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12">
+    <h5>Notdienst: <span class="fw-bold">${improvedNotdienst}</span></h5>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12">
+    <h5>Kunden-Name: <span class="fw-bold">${Name}</span></h5>
+    </div>
+  </div>
+
+  <div class="row">
+  <div class="col-12">
+  <h5>Kunden-Telefonnummer: <span class="fw-bold">${Telefonnummer}</span></h5>
+  </div>
+</div>
+
+    <!-- Optional JavaScript; choose one of the two! -->
+
+    <!-- Option 1: Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+
+    <!-- Option 2: Separate Popper and Bootstrap JS -->
+    <!--
+    -->
+  </body>
+</html>
+`;
 
 
   mailOptions = {
@@ -127,7 +202,7 @@ app.post('/sendMail', (req, res) => {
     to: 'stoerung@busam-online.de', // list of receivers
     subject: 'Neue Störungsmeldung', // Subject line
     text: allInformation, // plain text body
-    //html: output // html body
+    html: output, // html body
 
     
 
@@ -164,6 +239,7 @@ res.json({msg: 'Success'});
     if (req.files.file.size > 30000000){
       return res.json({ msg: 'Das Bild konnte nicht hochgeladen werden, da es die Grenze von 30 MB überschreitet, bitte wählen Sie ein kleineres Bild aus.' });
     } else{
+      var output = ``;
       var together;
       const file = req.files.file;
       const AnlagenNR = req.body.AnlagenNummer
@@ -264,24 +340,189 @@ res.json({msg: 'Success'});
     let allInformation;
     
     if(file.size < 30000000){
+      let ohneComma = stringStoerungsarten.slice(0, -1);
       allInformation = `Betroffene Anlagennummer: ${AnlagenNR}\n
       Betroffenes Gerät: ${Geraet}\n
-      Störungsart: ${stringStoerungsarten}\n
+      Störungsart: ${ohneComma}\n
       Störcode: ${improvedStoerCode}\n
       Beschreibung des Störungscode: ${improvedStoerText}\n
       Es liegt ein Bild der Störungsmeldung im Anhang dieser E-Mail vor. Bitte prüfen Sie dieses Bild.\n
       Notdienst: ${improvedNotdienst}\n
       Kunden-Name: ${Name}\n
-      Kunden-Telefonnummer: ${Telefonnummer}\n`
+      Kunden-Telefonnummer: ${Telefonnummer}\n`;
+
+      output = `
+      <!doctype html>
+    <html lang="de">
+      <head>
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+        <!-- Bootstrap CSS -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    
+        
+      </head>
+      <body>
+    
+      <div class="row">
+      <div class="col-12 text-center"><img src="https://www.busam-online.de/cms/de/media/pagebau/Logo.gif" class="rounded" alt="..."></div>
+       <br/><br/>
+       <h3 class="text-center"><u>Neue Störungsmeldung erfasst von ${Name}</u></h3>
+      </div> <br/>
+  
+    <div class="row">
+      <div class="col-12">
+      <h5>Betroffene Anlagennummer: <span class="fw-bold">${AnlagenNR}</span></h5>
+      </div>
+    </div>
+    
+      <div class="row">
+        <div class="col-12">
+        <h5>Betroffenes Gerät: <span class="fw-bold">${Geraet}</span></h5>
+        </div>
+      </div>
+    
+      <div class="row">
+      <div class="col-12">
+      <h5>Störungsart: <span class="fw-bold">${ohneComma}</span></h5>
+      </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-12">
+        <h5>Beschreibung des Störungscode: <span class="fw-bold">${improvedStoerText}</span></h5>
+        </div>
+      </div>
+
+      <div class="row">
+      <div class="col-12">
+      <h5><span class="fw-bold">Es liegt ein Bild der Störungsmeldung im Anhang dieser E-Mail vor. Bitte prüfen Sie dieses Bild.</span></h5>
+      </div>
+    </div>
+    
+      <div class="row">
+        <div class="col-12">
+        <h5>Notdienst: <span class="fw-bold">${improvedNotdienst}</span></h5>
+        </div>
+      </div>
+    
+      <div class="row">
+        <div class="col-12">
+        <h5>Kunden-Name: <span class="fw-bold">${Name}</span></h5>
+        </div>
+      </div>
+    
+      <div class="row">
+      <div class="col-12">
+      <h5>Kunden-Telefonnummer: <span class="fw-bold">${Telefonnummer}</span></h5>
+      </div>
+    </div>
+    
+        <!-- Optional JavaScript; choose one of the two! -->
+    
+        <!-- Option 1: Bootstrap Bundle with Popper -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+    
+        <!-- Option 2: Separate Popper and Bootstrap JS -->
+        <!--
+        -->
+      </body>
+    </html>
+    `;
+    
+
+
+
+
     } else{
+      let ohneComma = stringStoerungsarten.slice(0, -1);
       allInformation = `Betroffene Anlagennummer: ${AnlagenNR}\n
       Betroffenes Gerät: ${Geraet}\n
-      Störungsart: ${stringStoerungsarten}\n
+      Störungsart: ${ohneComma}\n
       Störcode: ${improvedStoerCode}\n
       Beschreibung des Störungscode: ${improvedStoerText}\n
       Notdienst: ${improvedNotdienst}\n
       Kunden-Name: ${Name}\n
-      Kunden-Telefonnummer: ${Telefonnummer}\n`
+      Kunden-Telefonnummer: ${Telefonnummer}\n`;
+
+      output = `
+      <!doctype html>
+    <html lang="de">
+      <head>
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+        <!-- Bootstrap CSS -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    
+        
+      </head>
+      <body>
+    
+      <div class="row">
+        <div class="col-12 text-center"><img src="https://www.busam-online.de/cms/de/media/pagebau/Logo.gif" class="rounded" alt="..."></div>
+         <br/><br/>
+         <h3 class="text-center"><u>Neue Störungsmeldung erfasst von ${Name}</u></h3>
+        </div> <br/>
+    
+      <div class="row">
+        <div class="col-12">
+        <h5>Betroffene Anlagennummer: <span class="fw-bold">${AnlagenNR}</span></h5>
+        </div>
+      </div>
+    
+      <div class="row">
+        <div class="col-12">
+        <h5>Betroffenes Gerät: <span class="fw-bold">${Geraet}</span></h5>
+        </div>
+      </div>
+    
+      <div class="row">
+      <div class="col-12">
+      <h5>Störungsart: <span class="fw-bold">${ohneComma}</span></h5>
+      </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-12">
+        <h5>Beschreibung des Störungscode: <span class="fw-bold">${improvedStoerText}</span></h5>
+        </div>
+      </div>
+    
+      <div class="row">
+        <div class="col-12">
+        <h5>Notdienst: <span class="fw-bold">${improvedNotdienst}</span></h5>
+        </div>
+      </div>
+    
+      <div class="row">
+        <div class="col-12">
+        <h5>Kunden-Name: <span class="fw-bold">${Name}</span></h5>
+        </div>
+      </div>
+    
+      <div class="row">
+      <div class="col-12">
+      <h5>Kunden-Telefonnummer: <span class="fw-bold">${Telefonnummer}</span></h5>
+      </div>
+    </div>
+    
+        <!-- Optional JavaScript; choose one of the two! -->
+    
+        <!-- Option 1: Bootstrap Bundle with Popper -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+    
+        <!-- Option 2: Separate Popper and Bootstrap JS -->
+        <!--
+        -->
+      </body>
+    </html>
+    `;
+    
+
     }  
     
     
@@ -292,8 +533,8 @@ res.json({msg: 'Success'});
           from: '"Störungsmeldung Busam" stoerung.meldung.busam@gmail.com', // sender address
           to: 'stoerung@busam-online.de', // list of receivers
           subject: 'Neue Störungsmeldung', // Subject line
-          text: allInformation, // plain text body
-          //html: output // html body
+          text: allInformation,
+          html: output,
           attachments: [{
             filename: file.name,
             path: `${__dirname}/uploads/${together}`
@@ -308,7 +549,7 @@ res.json({msg: 'Success'});
           to: 'stoerung@busam-online.de', // list of receivers
           subject: 'Neue Störungsmeldung', // Subject line
           text: allInformation, // plain text body
-          //html: output // html body
+          html: output // html body
        
       };
       
