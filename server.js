@@ -110,16 +110,91 @@ app.post('/sendMail', (req, res) => {
               
                   } 
     
-
+ let ohneComma = stringStoerungsarten.slice(0, -1);
 
   const allInformation = `Betroffene Anlagennummer: ${AnlagenNR}\n
   Betroffenes Gerät: ${Geraet}\n
-  Störungsart: ${stringStoerungsarten}\n
+  Störungsart: ${ohneComma}\n
   Störcode: ${improvedStoerCode}\n
   Beschreibung des Störungscode: ${improvedStoerText}\n
   Notdienst: ${improvedNotdienst}\n
   Kunden-Name: ${Name}\n
   Kunden-Telefonnummer: ${Telefonnummer}\n`
+
+  var output = `
+  <!doctype html>
+<html lang="de">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+
+    
+  </head>
+  <body>
+
+  <div class="row">
+  <div class="col-12 text-center"><img src="https://www.busam-online.de/cms/de/media/pagebau/Logo.gif" class="rounded" alt="..."></div>
+   <br/><br/>
+   <h3 class="text-center"><u>Neue Störungsmeldung erfasst von ${Name}</u></h3>
+  </div> <br/>
+
+<div class="row">
+  <div class="col-12">
+  <h5>Betroffene Anlagennummer: <span class="fw-bold">${AnlagenNR}</span></h5>
+  </div>
+</div>
+
+  <div class="row">
+    <div class="col-12">
+    <h5>Betroffenes Gerät: <span class="fw-bold">${Geraet}</span></h5>
+    </div>
+  </div>
+
+  <div class="row">
+  <div class="col-12">
+  <h5>Störungsart: <span class="fw-bold">${ohneComma}</span></h5>
+  </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+    <h5>Beschreibung des Störungscode: <span class="fw-bold">${improvedStoerText}</span></h5>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12">
+    <h5>Notdienst: <span class="fw-bold">${improvedNotdienst}</span></h5>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12">
+    <h5>Kunden-Name: <span class="fw-bold">${Name}</span></h5>
+    </div>
+  </div>
+
+  <div class="row">
+  <div class="col-12">
+  <h5>Kunden-Telefonnummer: <span class="fw-bold">${Telefonnummer}</span></h5>
+  </div>
+</div>
+
+    <!-- Optional JavaScript; choose one of the two! -->
+
+    <!-- Option 1: Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+
+    <!-- Option 2: Separate Popper and Bootstrap JS -->
+    <!--
+    -->
+  </body>
+</html>
+`;
 
 
   mailOptions = {
@@ -127,137 +202,395 @@ app.post('/sendMail', (req, res) => {
     to: 'stoerung@busam-online.de', // list of receivers
     subject: 'Neue Störungsmeldung', // Subject line
     text: allInformation, // plain text body
-    //html: output // html body
+    html: output, // html body
+
+    
+
+
 };
+
+
+ 
+let transporter = nodemailer.createTransport({
+  host: SMTP_HOST,
+  port: SMTP_PORT,
+  secure: false, // true for 465, false for other ports
+  auth: {
+      user: SMTP_USERNAME, // generated ethereal user
+      pass: SMTP_PASSWORD  // generated ethereal password
+  },
+  tls:{
+    rejectUnauthorized:false
+  }
+});
+
+
+
+transporter.sendMail(mailOptions, (error, info) => {
+if (error) {
+    return res.status(400).json({msg: error});
+}
+res.json({msg: 'Success'});
+});
 
     //return res.status(400).json({ msg: 'Das Bild konnte nicht hochgeladen werden.' });
   } else{
 
-  const file = req.files.file;
-  const AnlagenNR = req.body.AnlagenNummer
-  const Geraet = req.body.Geraet
-  const Heizung = req.body.Heizung
-  const WarmWasser = req.body.WarmWasser
-  const Undicht = req.body.Undicht
-  const StoerCode = req.body.StoerCode
-  const StoerText = req.body.StoerText
-  const Notdienst = req.body.Notdienst
-  const Name = req.body.Name
-  const Telefonnummer = req.body.Telefonnummer
-  let stringStoerungsarten = ''
-  let improvedStoerCode = ''
-  let improvedNotdienst = ''
-  let improvedStoerText = ''
-
-  if(Heizung === 'yes'){
-    stringStoerungsarten += 'Keine Heizung, '
-
-    } 
-
-
-  if(WarmWasser === 'yes'){
-    stringStoerungsarten += 'Kein Warmwasser, '
-
-    } 
-
-    if(Undicht === 'yes'){
-      stringStoerungsarten += 'Undichtigkeit an der Heizungsanlage, '
-  
-      } 
-
-      if(StoerCode === 'no'){
-        improvedStoerCode = 'Nein'
+    if (req.files.file.size > 30000000){
+      return res.json({ msg: 'Das Bild konnte nicht hochgeladen werden, da es die Grenze von 30 MB überschreitet, bitte wählen Sie ein kleineres Bild aus.' });
+    } else{
+      var output = ``;
+      var together;
+      const file = req.files.file;
+      const AnlagenNR = req.body.AnlagenNummer
+      const Geraet = req.body.Geraet
+      const Heizung = req.body.Heizung
+      const WarmWasser = req.body.WarmWasser
+      const Undicht = req.body.Undicht
+      const StoerCode = req.body.StoerCode
+      const StoerText = req.body.StoerText
+      const Notdienst = req.body.Notdienst
+      const Name = req.body.Name
+      const Telefonnummer = req.body.Telefonnummer
+      let stringStoerungsarten = ''
+      let improvedStoerCode = ''
+      let improvedNotdienst = ''
+      let improvedStoerText = ''
+    
+      
+     
+    
+      if(Heizung === 'yes'){
+        stringStoerungsarten += 'Keine Heizung, '
     
         } 
-
-        if(StoerCode === 'yes'){
-          improvedStoerCode = 'Ja'
+    
+    
+      if(WarmWasser === 'yes'){
+        stringStoerungsarten += 'Kein Warmwasser, '
+    
+        } 
+    
+        if(Undicht === 'yes'){
+          stringStoerungsarten += 'Undichtigkeit an der Heizungsanlage, '
       
           } 
-
-          if(Notdienst === 'no'){
-            improvedNotdienst = 'Nein'
+    
+          if(StoerCode === 'no'){
+            improvedStoerCode = 'Nein'
         
             } 
     
-            if(Notdienst === 'yes'){
-              improvedNotdienst = 'Ja'
+            if(StoerCode === 'yes'){
+              improvedStoerCode = 'Ja'
           
               } 
-
-              if(StoerText === ''){
-                improvedStoerText = 'Es wurde keine Beschreibung des Störcodes angegeben.'
+    
+              if(Notdienst === 'no'){
+                improvedNotdienst = 'Nein'
             
                 } 
-
-                if(StoerText !== ''){
-                  improvedStoerText = StoerText
+        
+                if(Notdienst === 'yes'){
+                  improvedNotdienst = 'Ja'
               
                   } 
-
-
-                  file.mv(`${__dirname}/uploads/${file.name}`, err => {
-                    if (err) {
-                      console.error(err);
-                      return res.status(500).send(err);
-                    }
+    
+                  if(StoerText === ''){
+                    improvedStoerText = 'Es wurde keine Beschreibung des Störcodes angegeben.'
                 
-                    //res.json({ fileName: file.name, filePath: `/uploads/${file.name}` });
-                  });
+                    } 
+    
+                    if(StoerText !== ''){
+                      improvedStoerText = StoerText
+                  
+                      } 
+     
+                      if(file.size < 30000000){
+                        let currentDate = new Date();
+                        let milliseconds = currentDate.getMilliseconds().toString();
+                        let seconds = currentDate.getSeconds().toString();
+                        let minutes = currentDate.getMinutes().toString();
+                        let hours = currentDate.getHours().toString();
+                        let result           = '';
+                        var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+                        var charactersLength = characters.length;
+                        for ( var i = 0; i < 5; i++ ) {
+                          result += characters.charAt(Math.floor(Math.random() * 
+                     charactersLength));
+                       }
+                     
+                       together = `${milliseconds}_${seconds}_${minutes}_${hours}_${result}_${file.name}`; 
+    
+                  
+    
+    
+                        file.mv(`${__dirname}/uploads/${together}`, err => {
+                          if (err) {
+                            console.error(err);
+                            return res.status(500).send(err);
+                          }
+                      
+                          //res.json({ fileName: file.name, filePath: `/uploads/${file.name}` });
+                        });
+          
+                      } 
+    
+                    
+    let allInformation;
+    
+    if(file.size < 30000000){
+      let ohneComma = stringStoerungsarten.slice(0, -1);
+      allInformation = `Betroffene Anlagennummer: ${AnlagenNR}\n
+      Betroffenes Gerät: ${Geraet}\n
+      Störungsart: ${ohneComma}\n
+      Störcode: ${improvedStoerCode}\n
+      Beschreibung des Störungscode: ${improvedStoerText}\n
+      Es liegt ein Bild der Störungsmeldung im Anhang dieser E-Mail vor. Bitte prüfen Sie dieses Bild.\n
+      Notdienst: ${improvedNotdienst}\n
+      Kunden-Name: ${Name}\n
+      Kunden-Telefonnummer: ${Telefonnummer}\n`;
+
+      output = `
+      <!doctype html>
+    <html lang="de">
+      <head>
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+        <!-- Bootstrap CSS -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    
+        
+      </head>
+      <body>
+    
+      <div class="row">
+      <div class="col-12 text-center"><img src="https://www.busam-online.de/cms/de/media/pagebau/Logo.gif" class="rounded" alt="..."></div>
+       <br/><br/>
+       <h3 class="text-center"><u>Neue Störungsmeldung erfasst von ${Name}</u></h3>
+      </div> <br/>
+  
+    <div class="row">
+      <div class="col-12">
+      <h5>Betroffene Anlagennummer: <span class="fw-bold">${AnlagenNR}</span></h5>
+      </div>
+    </div>
+    
+      <div class="row">
+        <div class="col-12">
+        <h5>Betroffenes Gerät: <span class="fw-bold">${Geraet}</span></h5>
+        </div>
+      </div>
+    
+      <div class="row">
+      <div class="col-12">
+      <h5>Störungsart: <span class="fw-bold">${ohneComma}</span></h5>
+      </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-12">
+        <h5>Beschreibung des Störungscode: <span class="fw-bold">${improvedStoerText}</span></h5>
+        </div>
+      </div>
+
+      <div class="row">
+      <div class="col-12">
+      <h5><span class="fw-bold">Es liegt ein Bild der Störungsmeldung im Anhang dieser E-Mail vor. Bitte prüfen Sie dieses Bild.</span></h5>
+      </div>
+    </div>
+    
+      <div class="row">
+        <div class="col-12">
+        <h5>Notdienst: <span class="fw-bold">${improvedNotdienst}</span></h5>
+        </div>
+      </div>
+    
+      <div class="row">
+        <div class="col-12">
+        <h5>Kunden-Name: <span class="fw-bold">${Name}</span></h5>
+        </div>
+      </div>
+    
+      <div class="row">
+      <div class="col-12">
+      <h5>Kunden-Telefonnummer: <span class="fw-bold">${Telefonnummer}</span></h5>
+      </div>
+    </div>
+    
+        <!-- Optional JavaScript; choose one of the two! -->
+    
+        <!-- Option 1: Bootstrap Bundle with Popper -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+    
+        <!-- Option 2: Separate Popper and Bootstrap JS -->
+        <!--
+        -->
+      </body>
+    </html>
+    `;
     
 
 
-  const allInformation = `Betroffene Anlagennummer: ${AnlagenNR}\n
-  Betroffenes Gerät: ${Geraet}\n
-  Störungsart: ${stringStoerungsarten}\n
-  Störcode: ${improvedStoerCode}\n
-  Beschreibung des Störungscode: ${improvedStoerText}\n
-  Es liegt ein Bild der Störungsmeldung im Anhang dieser E-Mail vor. Bitte prüfen Sie dieses Bild.\n
-  Notdienst: ${improvedNotdienst}\n
-  Kunden-Name: ${Name}\n
-  Kunden-Telefonnummer: ${Telefonnummer}\n`
 
 
-  mailOptions = {
-    from: '"Störungsmeldung Busam" stoerung.meldung.busam@gmail.com', // sender address
-    to: 'stoerung@busam-online.de', // list of receivers
-    subject: 'Neue Störungsmeldung', // Subject line
-    text: allInformation, // plain text body
-    //html: output // html body
-    attachments: [{
-      filename: file.name,
-      path: `${__dirname}/uploads/${file.name}`
-  }]
-};
+    } else{
+      let ohneComma = stringStoerungsarten.slice(0, -1);
+      allInformation = `Betroffene Anlagennummer: ${AnlagenNR}\n
+      Betroffenes Gerät: ${Geraet}\n
+      Störungsart: ${ohneComma}\n
+      Störcode: ${improvedStoerCode}\n
+      Beschreibung des Störungscode: ${improvedStoerText}\n
+      Notdienst: ${improvedNotdienst}\n
+      Kunden-Name: ${Name}\n
+      Kunden-Telefonnummer: ${Telefonnummer}\n`;
 
- 
+      output = `
+      <!doctype html>
+    <html lang="de">
+      <head>
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+        <!-- Bootstrap CSS -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    
+        
+      </head>
+      <body>
+    
+      <div class="row">
+        <div class="col-12 text-center"><img src="https://www.busam-online.de/cms/de/media/pagebau/Logo.gif" class="rounded" alt="..."></div>
+         <br/><br/>
+         <h3 class="text-center"><u>Neue Störungsmeldung erfasst von ${Name}</u></h3>
+        </div> <br/>
+    
+      <div class="row">
+        <div class="col-12">
+        <h5>Betroffene Anlagennummer: <span class="fw-bold">${AnlagenNR}</span></h5>
+        </div>
+      </div>
+    
+      <div class="row">
+        <div class="col-12">
+        <h5>Betroffenes Gerät: <span class="fw-bold">${Geraet}</span></h5>
+        </div>
+      </div>
+    
+      <div class="row">
+      <div class="col-12">
+      <h5>Störungsart: <span class="fw-bold">${ohneComma}</span></h5>
+      </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-12">
+        <h5>Beschreibung des Störungscode: <span class="fw-bold">${improvedStoerText}</span></h5>
+        </div>
+      </div>
+    
+      <div class="row">
+        <div class="col-12">
+        <h5>Notdienst: <span class="fw-bold">${improvedNotdienst}</span></h5>
+        </div>
+      </div>
+    
+      <div class="row">
+        <div class="col-12">
+        <h5>Kunden-Name: <span class="fw-bold">${Name}</span></h5>
+        </div>
+      </div>
+    
+      <div class="row">
+      <div class="col-12">
+      <h5>Kunden-Telefonnummer: <span class="fw-bold">${Telefonnummer}</span></h5>
+      </div>
+    </div>
+    
+        <!-- Optional JavaScript; choose one of the two! -->
+    
+        <!-- Option 1: Bootstrap Bundle with Popper -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+    
+        <!-- Option 2: Separate Popper and Bootstrap JS -->
+        <!--
+        -->
+      </body>
+    </html>
+    `;
+    
 
-} 
-
- 
-
- 
-  let transporter = nodemailer.createTransport({
-    host: SMTP_HOST,
-    port: SMTP_PORT,
-    secure: false, // true for 465, false for other ports
-    auth: {
-        user: SMTP_USERNAME, // generated ethereal user
-        pass: SMTP_PASSWORD  // generated ethereal password
-    },
-    tls:{
-      rejectUnauthorized:false
+    }  
+    
+    
+    
+      if(file.size < 30000000){
+    
+        mailOptions = {
+          from: '"Störungsmeldung Busam" stoerung.meldung.busam@gmail.com', // sender address
+          to: 'stoerung@busam-online.de', // list of receivers
+          subject: 'Neue Störungsmeldung', // Subject line
+          text: allInformation,
+          html: output,
+          attachments: [{
+            filename: file.name,
+            path: `${__dirname}/uploads/${together}`
+        }]
+      };
+      
+    
+    
+      } else{
+        mailOptions = {
+          from: '"Störungsmeldung Busam" stoerung.meldung.busam@gmail.com', // sender address
+          to: 'stoerung@busam-online.de', // list of receivers
+          subject: 'Neue Störungsmeldung', // Subject line
+          text: allInformation, // plain text body
+          html: output // html body
+       
+      };
+      
+      } 
+    
+     
+    
+     
+    let transporter = nodemailer.createTransport({
+      host: SMTP_HOST,
+      port: SMTP_PORT,
+      secure: false, // true for 465, false for other ports
+      auth: {
+          user: SMTP_USERNAME, // generated ethereal user
+          pass: SMTP_PASSWORD  // generated ethereal password
+      },
+      tls:{
+        rejectUnauthorized:false
+      }
+    });
+    
+    
+    
+    transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+        return res.status(400).json({msg: error});
     }
-  });
+    res.json({msg: 'Success'});
+    });
+    
+     
+    } 
 
   
 
-transporter.sendMail(mailOptions, (error, info) => {
-  if (error) {
-      return res.status(400).json({msg: error});
-  }
-  res.json({msg: 'Success'});
-});
+
+} 
+
+
+ 
+
 
 
 

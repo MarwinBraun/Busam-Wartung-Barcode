@@ -36,6 +36,7 @@ const Home = () => {
     const [AlertLoginSuccess, setAlertLoginSuccess] = useState(false);
     const [AlertLoginFail, setAlertLoginFail] = useState(false);
     const [AlertNoDeviceAvailable, setAlertNoDeviceAvailable] = useState(false);
+    const [AlertWrongFileValidation, setAlertWrongFileValidation] = useState(false);
     const [AlertNoMessdatenAvailable, setAlertNoMessdatenAvailable] = useState(false);
     const [AlertNoHistoryAvailable, setAlertNoHistoryAvailable] = useState(false);
     const [ExplanationText, setExplanationText] = useState('');
@@ -58,6 +59,7 @@ const Home = () => {
     const [AlertExtendedStoerung, setAlertExtendedStoerung] = useState(false);
     const [filename, setFilename] = useState('Bild schießen oder auswählen');
     const [Loading, setLoading] = useState(false);
+    const [LoadingSend, setLoadingSend] = useState(false);
     const inputRef = useRef(null);
 
     const onChange = e => {
@@ -136,7 +138,7 @@ const Home = () => {
         });
 
         const checkLogin = async () => {
-        if(Username === '1' && Password === '1'){
+        if(Username === 'monteur' && Password === 'monteur'){
         setLoading(true)
         setAlertLoginSuccess(true)
         setAlertLoginFail(false)
@@ -357,10 +359,11 @@ const anfrage = await axios.get('http://stoerung.busam-online.de:5000/getDeviceD
 
       }
 
-        const sendMail = () => {
+        const sendMail = async () => {
           setAlertStoerung(false)
           setAlertStoerCode(false)
           setAlertNotdienst(false)
+          setAlertWrongFileValidation(false)
           setAlertName(false)
           setAlertSuccess(false)
           setAlertServerFail(false)
@@ -379,13 +382,102 @@ const anfrage = await axios.get('http://stoerung.busam-online.de:5000/getDeviceD
           else if(StoerCodeValue === 'yes' && file === "" && StoerText === "" ) {
             setAlertExtendedStoerung(true)  
           } 
+
           else if(NotdienstLeistungValue === "") {
             setAlertNotdienst(true)  
-          } else if(Name === '' || Telefonnummer === '') {
+          } 
+          
+          else if(Name === '' || Telefonnummer === '') {
             setAlertName(true)  
           }
+
+         else if(file !== "") {
+            let fileValidation = filename.split('.'); 
+            if(fileValidation[1] === 'png' || fileValidation[1] === 'jpg' || fileValidation[1] === 'jpeg'){
+              setRenderSendButton(false)
+              setLoadingSend(true);
+                   
+            
+            try { 
+              const formData = new FormData();
+              formData.append('file', file);
+              formData.append('AnlagenNummer', TextAnlage);
+              formData.append('Geraet', GeraetText);
+              formData.append('Heizung', checkedHeizungValue);
+              formData.append('WarmWasser', checkedWarmWasserValue);
+              formData.append('Undicht', checkedUndichtValue);
+              formData.append('StoerCode', StoerCodeValue);
+              formData.append('StoerText', StoerText);
+              formData.append('Notdienst', NotdienstLeistungValue);
+              formData.append('Name', Name);
+              formData.append('Telefonnummer', Telefonnummer);
+              const res = await axios.post('http://stoerung.busam-online.de:5000/sendMail', formData, {
+                
+                headers: {
+                  'Content-Type': 'multipart/form-data'
+                },
+    
+              /*
+                AnlagenNummer: TextAnlage,
+                Geraet: GeraetText,
+                Heizung: checkedHeizung,
+                WarmWasser: checkedWarmWasser,
+                Undicht: checkedUndicht,
+                StoerCode: StoerCodeValue,
+                Notdienst: NotdienstLeistungValue,
+                Name: Name,
+                Telefonnummer: Telefonnummer
+    
+                */
+    
+              })
+
+             // const { msgg } = res.data;
+          
+              
+             // console.log(res.data.msgg);
+
+              if(res.data.msg === 'Success'){
+                setLoadingSend(false)
+              //alert(res.data);
+              setAlertSuccess(true)
+              setRenderSendButton(false)
+
+             }
+              
+              if(res.data.msg === 'Das Bild konnte nicht hochgeladen werden, da es die Grenze von 30 MB überschreitet, bitte wählen Sie ein kleineres Bild aus.'){
+              setLoadingSend(false)
+          
+                setExplanationText(res.data.msg)
+                setAlertServerFail(true)
+                setRenderSendButton(true)
+             
+             } 
+
+          
+              
+            } catch (err) { 
+              //if (err.response.status === 400) {
+              //  setAlertServerFail(true)
+            //}else {
+              //setAlertServerFailExplanation(true)
+              //setExplanationText(err.response.data.msg)
+            //} 
+          }   
+    
+
+
+            } else{
+              setAlertWrongFileValidation(true) 
+            } 
            
-           else { 
+          } 
+
+        
+           
+       else if(file === "")  { 
+        setLoadingSend(true)
+        setRenderSendButton(false)
         try { 
           const formData = new FormData();
           formData.append('file', file);
@@ -399,7 +491,7 @@ const anfrage = await axios.get('http://stoerung.busam-online.de:5000/getDeviceD
           formData.append('Notdienst', NotdienstLeistungValue);
           formData.append('Name', Name);
           formData.append('Telefonnummer', Telefonnummer);
-          const res = axios.post('http://stoerung.busam-online.de:5000/sendMail', formData, {
+          const res = await axios.post('http://stoerung.busam-online.de:5000/sendMail', formData, {
             
             headers: {
               'Content-Type': 'multipart/form-data'
@@ -420,17 +512,36 @@ const anfrage = await axios.get('http://stoerung.busam-online.de:5000/getDeviceD
 
           })
 
-          setAlertSuccess(true)
-          setRenderSendButton(false)
-          setLoading(false)
+
+          if(res.data.msg === 'Success'){
+
+            setLoadingSend(false)
+            setAlertSuccess(true)
+            setRenderSendButton(false)
+
+            } 
+
+            if(res.data.msg === 'Das Bild konnte nicht hochgeladen werden, da es die Grenze von 30 MB überschreitet, bitte wählen Sie ein kleineres Bild aus.'){
+              setLoadingSend(false)
+              setExplanationText(res.data.msg)
+              setAlertServerFail(true)
+              setRenderSendButton(false)
+           
+            } 
+
+
+
+
+         
+        
           
         } catch (err) { 
-          if (err.response.status === 500) {
-            setAlertServerFail(true)
-        }else {
-          setAlertServerFailExplanation(true)
-          setExplanationText(err.response.data.msg)
-        } 
+         // if (err.response.status === 500) {
+           // setAlertServerFail(true)
+       // }//else {
+          //setAlertServerFailExplanation(true)
+          //setExplanationText(err.response.data.msg)
+        //} 
       }   
       }  
       
@@ -702,6 +813,15 @@ variant="outline-primary"
       </Alert>
   ): null }
 
+{AlertWrongFileValidation ? (
+  <Alert variant="danger" onClose={() => setAlertWrongFileValidation(false)} dismissible>
+        <Alert.Heading>Es wurde kein gültiges Bildformat ausgewählt.</Alert.Heading>
+        <p>
+        Bitte stellen Sie uns ausschließlich ein Bild zur Verfügung, andere Dateiformate werden nicht unterstützt.
+        </p>
+      </Alert>
+  ): null }
+
 {AlertNotdienst ? (
   <Alert variant="danger" onClose={() => setAlertNotdienst(false)} dismissible>
         <Alert.Heading>Es wurde keine Auswahl über die Notdienstleistung getroffen</Alert.Heading>
@@ -738,6 +858,25 @@ variant="outline-primary"
       </Alert>
   ): null }
 
+{LoadingSend ? (
+
+
+<Row className="justify-content-md-center">
+<Button variant="primary" disabled>
+    <Spinner
+      as="span"
+      animation="border"
+      size="sm"
+      role="status"
+      aria-hidden="true"
+    />
+    Bitte haben Sie einen Moment Geduld und schließen die Seite nicht, Sie erhalten eine Rückmeldung, sobald Ihre Störungsmeldung an uns erfolgreich übersandt wurde...
+  </Button>
+</Row>
+
+) : null} 
+
+
 {AlertSuccess ? (
   <Alert variant="success" onClose={() => setAlertSuccess(false)} dismissible>
         <Alert.Heading>Übertragung erfolgreich</Alert.Heading>
@@ -750,7 +889,9 @@ variant="outline-primary"
 
 
 {RenderSendButton ? (
-  <Button onClick={sendMail} variant="primary">Absenden</Button>
+  <div>
+  <Button onClick={sendMail} variant="primary">Absenden</Button> <br/> <br/><br/><br/>
+  </div>
   ): null }
 
 
