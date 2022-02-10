@@ -11,18 +11,25 @@ const Home = () => {
   const [TextAnlage, setTextAnlage] = useState('');
   const [GeraetText, setGeraetText] = useState('');
   const [Name, setName] = useState('');
+  const [Ansprechpartner, setAnsprechpartner] = useState('');
   const [Telefonnummer, setTelefonnummer] = useState('');
     const [checkedHeizung, setCheckedHeizung] = useState(false);
+    const [checkedLueftung, setCheckedLueftung] = useState(false);
+    const [checkedKlima, setCheckedKlima] = useState(false);
     const [checkedHeizungValue, setcheckedHeizungValue] = useState('no');
     const [checkedWarmWasser, setCheckedWarmWasser] = useState(false);
+    const [checkedLueftungValue, setcheckedLueftungValue] = useState('no');
+    const [checkedKlimaValue, setcheckedKlimaValue] = useState('no');
     const [checkedWarmWasserValue, setcheckedWarmWasserValue] = useState('no');
     const [checkedUndicht, setCheckedUndicht] = useState(false);
     const [checkedUndichtValue, setcheckedUndichtValue] = useState('no');
     const [StoerCodeValue, setStoerCodeValue] = useState("");
+    const [ResetValue, setResetValue] = useState("");
     const [NotdienstLeistungValue, setNotdienstLeistungValue] = useState("");
     const [AlertStoerung, setAlertStoerung] = useState(false);
     const [AlertStoerCode, setAlertStoerCode] = useState(false);
     const [AlertNotdienst, setAlertNotdienst] = useState(false);
+    const [AlertReset, setAlertResetValue] = useState(false);
     const [AlertName, setAlertName] = useState(false);
     const [AlertServerFailExplanation, setAlertServerFailExplanation] = useState(false);
     const [AlertDeviceFailExplanation, setAlertDeviceFailExplanation] = useState(false);
@@ -60,6 +67,7 @@ const Home = () => {
     const [filename, setFilename] = useState('Bild schießen oder auswählen');
     const [Loading, setLoading] = useState(false);
     const [LoadingSend, setLoadingSend] = useState(false);
+    const [Datum, setDatum] = useState('');
     const inputRef = useRef(null);
 
     const onChange = e => {
@@ -111,6 +119,12 @@ const Home = () => {
 
   }
 
+  const ResetOptions = [
+    {name: "Ja", value: "yes"},
+    {name: "Nein", value: "no"},   
+
+  ];
+
     const StoerCodeOptions = [
       {name: "Ja", value: "yes"},
       {name: "Nein", value: "no"},   
@@ -134,6 +148,16 @@ const Home = () => {
 
            setTextAnlage(params.anlagenid)
            setGeraetText(params.geraetid) 
+
+           let aktuellesDatum = new Date();
+           let Tag = ('0' + aktuellesDatum.getDate()).slice(-2);   
+           let Monat = ('0' + (aktuellesDatum.getMonth()+1)).slice(-2); 
+           let Jahr = aktuellesDatum.getFullYear();
+           let Stunden = ('0' + aktuellesDatum.getHours()).slice(-2); 
+           let Minuten = ('0' + aktuellesDatum.getMinutes()).slice(-2); 
+        
+           let datumKomplett = `${Tag}.${Monat}.${Jahr} um ${Stunden}:${Minuten} Uhr`;
+           setDatum(datumKomplett);
 
         });
 
@@ -369,47 +393,59 @@ const anfrage = await axios.get('http://stoerung.busam-online.de:5000/getDeviceD
           setAlertServerFail(false)
           setAlertServerFailExplanation(false)
           setAlertExtendedStoerung(false)
+          setAlertResetValue(false)
           setExplanationText('')
 
 
-          if(checkedHeizung === false && checkedWarmWasser === false  && checkedUndicht === false ){
+          if(checkedHeizung === false && checkedWarmWasser === false  && checkedUndicht === false
+            && checkedLueftung === false && checkedKlima === false  ){
            setAlertStoerung(true)
 
            } else if(StoerCodeValue === "") {
             setAlertStoerCode(true)  
           } 
           
-          else if(StoerCodeValue === 'yes' && file === "" && StoerText === "" ) {
+          else if(file === "" && StoerText === "" ) {
             setAlertExtendedStoerung(true)  
+          } 
+
+          else if(ResetValue === "") {
+            setAlertResetValue(true)  
           } 
 
           else if(NotdienstLeistungValue === "") {
             setAlertNotdienst(true)  
           } 
           
-          else if(Name === '' || Telefonnummer === '') {
+          else if(Name === '' || Telefonnummer === '' || Ansprechpartner === '') {
             setAlertName(true)  
           }
 
          else if(file !== "") {
             let fileValidation = filename.split('.'); 
-            if(fileValidation[1] === 'png' || fileValidation[1] === 'jpg' || fileValidation[1] === 'jpeg'){
+            if(fileValidation[1] === 'png' || fileValidation[1] === 'jpg' || fileValidation[1] === 'jpeg'
+            || fileValidation[1] === 'PNG' || fileValidation[1] === 'JPG' || fileValidation[1] === 'JPEG'){
               setRenderSendButton(false)
               setLoadingSend(true);
                    
             
             try { 
               const formData = new FormData();
+              formData.append('Datum', Datum);
               formData.append('file', file);
               formData.append('AnlagenNummer', TextAnlage);
               formData.append('Geraet', GeraetText);
               formData.append('Heizung', checkedHeizungValue);
               formData.append('WarmWasser', checkedWarmWasserValue);
               formData.append('Undicht', checkedUndichtValue);
+              formData.append('Lueftung', checkedLueftungValue);
+              formData.append('Klima', checkedKlimaValue);
               formData.append('StoerCode', StoerCodeValue);
+              formData.append('Reset', ResetValue);
               formData.append('StoerText', StoerText);
               formData.append('Notdienst', NotdienstLeistungValue);
               formData.append('Name', Name);
+              formData.append('Ansprechpartner', Ansprechpartner);
               formData.append('Telefonnummer', Telefonnummer);
               const res = await axios.post('http://stoerung.busam-online.de:5000/sendMail', formData, {
                 
@@ -480,16 +516,21 @@ const anfrage = await axios.get('http://stoerung.busam-online.de:5000/getDeviceD
         setRenderSendButton(false)
         try { 
           const formData = new FormData();
+          formData.append('Datum', Datum);
           formData.append('file', file);
           formData.append('AnlagenNummer', TextAnlage);
           formData.append('Geraet', GeraetText);
           formData.append('Heizung', checkedHeizungValue);
           formData.append('WarmWasser', checkedWarmWasserValue);
           formData.append('Undicht', checkedUndichtValue);
+          formData.append('Lueftung', checkedLueftungValue);
+          formData.append('Klima', checkedKlimaValue);
           formData.append('StoerCode', StoerCodeValue);
+          formData.append('Reset', ResetValue);
           formData.append('StoerText', StoerText);
           formData.append('Notdienst', NotdienstLeistungValue);
           formData.append('Name', Name);
+          formData.append('Ansprechpartner', Ansprechpartner);
           formData.append('Telefonnummer', Telefonnummer);
           const res = await axios.post('http://stoerung.busam-online.de:5000/sendMail', formData, {
             
@@ -574,6 +615,34 @@ const anfrage = await axios.get('http://stoerung.busam-online.de:5000/getDeviceD
 
       } 
 
+      function LueftungCheck (e) {
+
+        setCheckedLueftung(e.currentTarget.checked)
+       // alert(checkedUndicht)
+
+        if (checkedLueftung){
+            setcheckedLueftungValue('no')
+        } else{
+          setcheckedLueftungValue('yes')
+        } 
+
+      } 
+
+
+      function KlimaCheck (e) {
+
+        setCheckedKlima(e.currentTarget.checked)
+       // alert(checkedUndicht)
+
+        if (checkedKlima){
+            setcheckedKlimaValue('no')
+        } else{
+          setcheckedKlimaValue('yes')
+        } 
+
+      } 
+
+
        
 
       function WarmWasserCheck (e) {
@@ -604,7 +673,13 @@ const anfrage = await axios.get('http://stoerung.busam-online.de:5000/getDeviceD
           <br/>
 
           <Row>
-            <Col xs={5}><Button onClick={handleShow} variant="info">Informationen anzeigen (nur für Monteure)</Button></Col>
+            <Col style={{textAlign: "left", fontWeight: "bold"}} xs={12}>Datum: <span>{Datum}</span></Col>
+          </Row>
+          <br/>
+
+          <Row>
+            <Col xs={12}><Button onClick={handleShow} variant="info">Informationen anzeigen (nur für Monteure)</Button></Col>
+           
           </Row>
 <br/>
 
@@ -625,6 +700,15 @@ const anfrage = await axios.get('http://stoerung.busam-online.de:5000/getDeviceD
   <Form.Group className="mb-3">
     <Form.Label>Geräte Nummer / Bezeichnung</Form.Label>
     <Form.Control disabled value={GeraetText} onChange={(e) => setGeraetText(e.target.value)} type="text" placeholder="Geräte Nummer / Bezeichnung" />
+ 
+  </Form.Group>
+
+  </Form>
+  <br/>
+
+  <Form>
+  <Form.Group className="mb-3">
+    <Form.Label><b className="text-danger">Bei Gasgeruch oder Gefahr für Leib und Leben DRINGEND SOFORT DIE 07805-9596-18 WÄHLEN! </b> </Form.Label>
  
   </Form.Group>
 
@@ -668,15 +752,57 @@ const anfrage = await axios.get('http://stoerung.busam-online.de:5000/getDeviceD
   value="3"
   onChange={(e) => UndichtCheck(e)}
 >
-  Undichtigkeit an der Heizungsanlage
+  Undichtigkeit
+</ToggleButton>
+</ButtonGroup> 
+
+<ButtonGroup className="mb-2">
+<ToggleButton style={{marginLeft: "10px"}}
+  id="toggle-checkLueftung"
+  type="checkbox"
+  variant="outline-primary"
+  checked={checkedLueftung}
+  value="3"
+  onChange={(e) => LueftungCheck(e)}
+>
+  Störung Lüftung
+</ToggleButton>
+</ButtonGroup> 
+
+<ButtonGroup className="mb-2">
+<ToggleButton style={{marginLeft: "10px"}}
+  id="toggle-checkKlima"
+  type="checkbox"
+  variant="outline-primary"
+  checked={checkedKlima}
+  value="3"
+  onChange={(e) => KlimaCheck(e)}
+>
+  Störung Klima
 </ToggleButton>
 </ButtonGroup> 
 <br/>
 <Form.Text className="text-muted">
-      (Mehrfachauswahl möglich)
+      (Mehrfachauswahl möglich.)
     </Form.Text>
 
     <br/> <br/>
+
+    <div>
+
+  <Form>
+  <Form.Group className="mb-3">
+    <Form.Label>Bitte beschreiben Sie den Fehler.</Form.Label>
+    <Form.Control as="textarea" rows={3}  value={StoerText} onChange={(e) => setStoerText(e.target.value)} type="text" placeholder="Beschreiben Sie die angezeigte Störungsmeldung..." />
+ 
+  </Form.Group>
+
+  </Form>
+
+  <br/>
+
+
+      </div>
 
   <h5>Wird an der Heizungsanlage ein Störcode angezeigt?</h5>
 
@@ -706,34 +832,41 @@ variant="outline-primary"
 
  
 </ButtonGroup> <br/> <br/>
-{StoerCodeValue === 'yes' ? (
 
-  <div>
 
-  <Form>
-  <Form.Group className="mb-3">
-    <Form.Label>Bitte den Störungscode beschreiben oder ein Bild des Fehlers hochladen</Form.Label>
-    <Form.Control as="textarea" rows={3}  value={StoerText} onChange={(e) => setStoerText(e.target.value)} type="text" placeholder="Beschreiben Sie die angezeigte Störungsmeldung..." />
- 
-  </Form.Group>
+<h5>Wurde bereits ein Reset durchgeführt?</h5>
 
-  </Form>
+<ButtonGroup  className="mb-2">
+{ResetOptions.map((option, index) => (
 
-  <br/>
+<ToggleButton
+style={{marginLeft: "10px"}}
+key={index}
+id={`optionn-${index}`}
+type="radio"
+name="radios"
+value={option.value}
+checked={ResetValue === option.value}
+onChange={e => setResetValue(e.currentTarget.value)}
+variant="outline-primary"
 
-  <Form>
-  <Form.Group as={Row}>
-  <input
-            type='file'
-            className='custom-file-input'
-            id='customFile'
-            onChange={onChange}
-          />
-      </Form.Group>
-      </Form>
-      </div>
 
-) : null} 
+
+>
+{option.name}
+</ToggleButton>
+
+
+))}
+
+
+
+</ButtonGroup> <br/> <br/>
+
+
+
+  
+
 
 
 
@@ -741,6 +874,9 @@ variant="outline-primary"
 <br/> 
 
 <h5>Soll die Störung als Notdienstleistung übermittelt werden?</h5>
+<Form.Text className="text-muted">
+      (Beachten Sie, dass bei einer erbrachten Notldienstleistung zusätzliche Kosten anfallen.)
+    </Form.Text> <br/><br/>
 
 <ButtonGroup  className="mb-2">
 {NotdienstLeistungOptions.map((option, index) => (
@@ -771,10 +907,31 @@ variant="outline-primary"
 
 <br/> <br/>
 
+<Form>
+<h5>Stellen Sie uns gegebenenfalls ein Bild der Störung zur Verfügung.</h5>
+  <Form.Group as={Row}>
+  <input
+            type='file'
+            className='custom-file-input'
+            id='customFile'
+            onChange={onChange}
+          />
+      </Form.Group>
+      </Form>
+
+      <br/> <br/>
+
+
 
   <Form.Group className="mb-3">
     <Form.Label>Ihr Name:</Form.Label>
     <Form.Control value={Name} onChange={(e) => setName(e.target.value)} type="text" />
+   
+  </Form.Group>
+
+  <Form.Group className="mb-3">
+    <Form.Label>Ansprechpartner:</Form.Label>
+    <Form.Control value={Ansprechpartner} onChange={(e) => setAnsprechpartner(e.target.value)} type="text" />
    
   </Form.Group>
 
@@ -791,6 +948,16 @@ variant="outline-primary"
         <Alert.Heading>Es wurde keine Auswahl der Störung getroffen</Alert.Heading>
         <p>
           Bite kreuzen Sie eine oder mehrere Optionen unter "Welche Störung liegt vor?" an. 
+        </p>
+      </Alert>
+  ): null }
+
+
+{AlertReset ? (
+  <Alert variant="danger" onClose={() => setAlertResetValue(false)} dismissible>
+        <Alert.Heading>Es wurde keine Auswahl über den Reset getroffen.</Alert.Heading>
+        <p>
+          Bite kreuzen Sie eine Option unter "Wurde bereits ein Reset durchgeführt?" an. 
         </p>
       </Alert>
   ): null }
@@ -833,9 +1000,9 @@ variant="outline-primary"
 
 {AlertName ? (
   <Alert variant="danger" onClose={() => setAlertName(false)} dismissible>
-        <Alert.Heading>Es wurde kein Name oder eine Telefonnummer eingetragen</Alert.Heading>
+        <Alert.Heading>Es wurde kein Name, Ansprechpartner oder eine Telefonnummer eingetragen</Alert.Heading>
         <p>
-          Bitte tragen Sie Ihren Namen und Ihre Telefonnummer ein. 
+          Bitte tragen Sie Ihren Namen, Ansprechpartner und Ihre Telefonnummer ein. 
         </p>
       </Alert>
   ): null }

@@ -48,21 +48,26 @@ app.post('/sendMail', (req, res) => {
 
   if (req.files === null) {
 
-
+  const Datum = req.body.Datum
   const AnlagenNR = req.body.AnlagenNummer
   const Geraet = req.body.Geraet
   const Heizung = req.body.Heizung
   const WarmWasser = req.body.WarmWasser
   const Undicht = req.body.Undicht
+  const Lueftung = req.body.Lueftung
+  const Klima = req.body.Klima
   const StoerCode = req.body.StoerCode
+  const Reset = req.body.Reset
   const StoerText = req.body.StoerText
   const Notdienst = req.body.Notdienst
   const Name = req.body.Name
+  const Ansprechpartner = req.body.Ansprechpartner
   const Telefonnummer = req.body.Telefonnummer
   let stringStoerungsarten = ''
   let improvedStoerCode = ''
   let improvedNotdienst = ''
   let improvedStoerText = ''
+  let improvedReset = ''
 
   if(Heizung === 'yes'){
     stringStoerungsarten += 'Keine Heizung, '
@@ -76,9 +81,19 @@ app.post('/sendMail', (req, res) => {
     } 
 
     if(Undicht === 'yes'){
-      stringStoerungsarten += 'Undichtigkeit an der Heizungsanlage, '
+      stringStoerungsarten += 'Undichtigkeit, '
   
       } 
+
+      if(Lueftung === 'yes'){
+        stringStoerungsarten += 'Störung Lüftung, '
+    
+        } 
+
+        if(Klima === 'yes'){
+          stringStoerungsarten += 'Störung Klima, '
+      
+          } 
 
       if(StoerCode === 'no'){
         improvedStoerCode = 'Nein'
@@ -89,6 +104,16 @@ app.post('/sendMail', (req, res) => {
           improvedStoerCode = 'Ja'
       
           } 
+
+          if(Reset === 'no'){
+            improvedReset = 'Nein'
+        
+            } 
+    
+            if(Reset === 'yes'){
+              improvedReset = 'Ja'
+          
+              } 
 
           if(Notdienst === 'no'){
             improvedNotdienst = 'Nein'
@@ -112,13 +137,17 @@ app.post('/sendMail', (req, res) => {
     
  let ohneComma = stringStoerungsarten.slice(0, -1);
 
-  const allInformation = `Betroffene Anlagennummer: ${AnlagenNR}\n
+  const allInformation = `
+  Datum: ${Datum}\n
+  Betroffene Anlagennummer: ${AnlagenNR}\n
   Betroffenes Gerät: ${Geraet}\n
   Störungsart: ${ohneComma}\n
   Störcode: ${improvedStoerCode}\n
+  Reset durchgeführt: ${improvedReset}\n
   Beschreibung des Störungscode: ${improvedStoerText}\n
   Notdienst: ${improvedNotdienst}\n
   Kunden-Name: ${Name}\n
+  Ansprechpartner: ${Ansprechpartner}\n
   Kunden-Telefonnummer: ${Telefonnummer}\n`
 
   var output = `
@@ -139,7 +168,8 @@ app.post('/sendMail', (req, res) => {
   <div class="row">
   <div class="col-12 text-center"><img src="https://www.busam-online.de/cms/de/media/pagebau/Logo.gif" class="rounded" alt="..."></div>
    <br/><br/>
-   <h3 class="text-center"><u>Neue Störungsmeldung erfasst von ${Name}</u></h3>
+   <h3 class="text-center"><u>Neue Störungsmeldung erfasst von ${Name}</u></h3> <br/>
+   <h3 class="text-center"><u>am ${Datum}</u></h3> 
   </div> <br/>
 
 <div class="row">
@@ -168,6 +198,13 @@ app.post('/sendMail', (req, res) => {
 
   <div class="row">
     <div class="col-12">
+    <h5>Reset durchgeführt: <span class="fw-bold">${improvedReset}</span></h5>
+    </div>
+  </div>
+
+
+  <div class="row">
+    <div class="col-12">
     <h5>Notdienst: <span class="fw-bold">${improvedNotdienst}</span></h5>
     </div>
   </div>
@@ -177,6 +214,12 @@ app.post('/sendMail', (req, res) => {
     <h5>Kunden-Name: <span class="fw-bold">${Name}</span></h5>
     </div>
   </div>
+
+  <div class="row">
+  <div class="col-12">
+  <h5>Kunden-Name: <span class="fw-bold">${Ansprechpartner}</span></h5>
+  </div>
+</div>
 
   <div class="row">
   <div class="col-12">
@@ -241,21 +284,27 @@ res.json({msg: 'Success'});
     } else{
       var output = ``;
       var together;
+      const Datum = req.body.Datum;
       const file = req.files.file;
       const AnlagenNR = req.body.AnlagenNummer
       const Geraet = req.body.Geraet
       const Heizung = req.body.Heizung
       const WarmWasser = req.body.WarmWasser
       const Undicht = req.body.Undicht
+      const Lueftung = req.body.Lueftung
+      const Klima = req.body.Klima
       const StoerCode = req.body.StoerCode
+      const Reset = req.body.Reset
       const StoerText = req.body.StoerText
       const Notdienst = req.body.Notdienst
       const Name = req.body.Name
+      const Ansprechpartner = req.body.Ansprechpartner
       const Telefonnummer = req.body.Telefonnummer
       let stringStoerungsarten = ''
       let improvedStoerCode = ''
       let improvedNotdienst = ''
       let improvedStoerText = ''
+      let improvedReset = ''
     
       
      
@@ -276,6 +325,17 @@ res.json({msg: 'Success'});
       
           } 
     
+          if(Lueftung === 'yes'){
+            stringStoerungsarten += 'Störung Lüftung, '
+        
+            } 
+    
+            if(Klima === 'yes'){
+              stringStoerungsarten += 'Störung Klima, '
+          
+              } 
+        
+
           if(StoerCode === 'no'){
             improvedStoerCode = 'Nein'
         
@@ -285,6 +345,16 @@ res.json({msg: 'Success'});
               improvedStoerCode = 'Ja'
           
               } 
+
+              if(Reset === 'no'){
+                improvedReset = 'Nein'
+            
+                } 
+        
+                if(Reset === 'yes'){
+                  improvedReset = 'Ja'
+              
+                  } 
     
               if(Notdienst === 'no'){
                 improvedNotdienst = 'Nein'
@@ -341,14 +411,18 @@ res.json({msg: 'Success'});
     
     if(file.size < 30000000){
       let ohneComma = stringStoerungsarten.slice(0, -1);
-      allInformation = `Betroffene Anlagennummer: ${AnlagenNR}\n
+      allInformation = 
+      `Datum: ${Datum}\n
+      Betroffene Anlagennummer: ${AnlagenNR}\n
       Betroffenes Gerät: ${Geraet}\n
       Störungsart: ${ohneComma}\n
       Störcode: ${improvedStoerCode}\n
+      Reset durchgeführt: ${improvedReset}\n
       Beschreibung des Störungscode: ${improvedStoerText}\n
       Es liegt ein Bild der Störungsmeldung im Anhang dieser E-Mail vor. Bitte prüfen Sie dieses Bild.\n
       Notdienst: ${improvedNotdienst}\n
       Kunden-Name: ${Name}\n
+      Kunden-Name: ${Name}\n: ${Ansprechpartner}\n
       Kunden-Telefonnummer: ${Telefonnummer}\n`;
 
       output = `
@@ -369,7 +443,8 @@ res.json({msg: 'Success'});
       <div class="row">
       <div class="col-12 text-center"><img src="https://www.busam-online.de/cms/de/media/pagebau/Logo.gif" class="rounded" alt="..."></div>
        <br/><br/>
-       <h3 class="text-center"><u>Neue Störungsmeldung erfasst von ${Name}</u></h3>
+       <h3 class="text-center"><u>Neue Störungsmeldung erfasst von ${Name}</u></h3><br/>
+       <h3 class="text-center"><u>am ${Datum}</u></h3>
       </div> <br/>
   
     <div class="row">
@@ -402,6 +477,13 @@ res.json({msg: 'Success'});
       </div>
     </div>
     
+    <div class="row">
+    <div class="col-12">
+    <h5>Reset durchgeführt: <span class="fw-bold">${improvedReset}</span></h5>
+    </div>
+  </div>
+
+
       <div class="row">
         <div class="col-12">
         <h5>Notdienst: <span class="fw-bold">${improvedNotdienst}</span></h5>
@@ -414,6 +496,12 @@ res.json({msg: 'Success'});
         </div>
       </div>
     
+      <div class="row">
+      <div class="col-12">
+      <h5>Ansprechpartner: <span class="fw-bold">${Ansprechpartner}</span></h5>
+      </div>
+    </div>
+
       <div class="row">
       <div class="col-12">
       <h5>Kunden-Telefonnummer: <span class="fw-bold">${Telefonnummer}</span></h5>
@@ -438,12 +526,16 @@ res.json({msg: 'Success'});
 
     } else{
       let ohneComma = stringStoerungsarten.slice(0, -1);
-      allInformation = `Betroffene Anlagennummer: ${AnlagenNR}\n
+      allInformation = `
+      Datum: ${Datum}\n
+      Betroffene Anlagennummer: ${AnlagenNR}\n
       Betroffenes Gerät: ${Geraet}\n
       Störungsart: ${ohneComma}\n
       Störcode: ${improvedStoerCode}\n
+      Reset durchgeführt: ${improvedReset}\n
       Beschreibung des Störungscode: ${improvedStoerText}\n
       Notdienst: ${improvedNotdienst}\n
+      Ansprechpartner: ${Ansprechpartner}\n
       Kunden-Name: ${Name}\n
       Kunden-Telefonnummer: ${Telefonnummer}\n`;
 
@@ -465,7 +557,8 @@ res.json({msg: 'Success'});
       <div class="row">
         <div class="col-12 text-center"><img src="https://www.busam-online.de/cms/de/media/pagebau/Logo.gif" class="rounded" alt="..."></div>
          <br/><br/>
-         <h3 class="text-center"><u>Neue Störungsmeldung erfasst von ${Name}</u></h3>
+         <h3 class="text-center"><u>Neue Störungsmeldung erfasst von ${Name}</u></h3><br/>
+         <h3 class="text-center"><u>am ${Datum}</u></h3>
         </div> <br/>
     
       <div class="row">
@@ -491,6 +584,12 @@ res.json({msg: 'Success'});
         <h5>Beschreibung des Störungscode: <span class="fw-bold">${improvedStoerText}</span></h5>
         </div>
       </div>
+
+      <div class="row">
+      <div class="col-12">
+      <h5>Reset durchgeführt: <span class="fw-bold">${improvedReset}</span></h5>
+      </div>
+    </div>
     
       <div class="row">
         <div class="col-12">
@@ -503,6 +602,12 @@ res.json({msg: 'Success'});
         <h5>Kunden-Name: <span class="fw-bold">${Name}</span></h5>
         </div>
       </div>
+
+      <div class="row">
+      <div class="col-12">
+      <h5>Ansprechpartner: <span class="fw-bold">${Ansprechpartner}</span></h5>
+      </div>
+    </div>
     
       <div class="row">
       <div class="col-12">
